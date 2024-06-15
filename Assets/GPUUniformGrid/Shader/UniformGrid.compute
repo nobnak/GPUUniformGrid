@@ -1,0 +1,13 @@
+#pragma kernel InitializeCells
+#pragma kernel InitializeElements
+
+#include "../ShaderLibrary/UniformGrid.hlsl"
+
+[numthreads(64,1,1)]
+void InitializeCells (uint3 id : SV_DispatchThreadID) {
+	UniformGrid_cellHead.Store(4 * id.x, -1);
+}
+[numthreads(64,1,1)]
+void InitializeElements (uint3 id : SV_DispatchThreadID) {
+	UniformGrid_cellNext.Store(4 * id.x, -1);
+}
