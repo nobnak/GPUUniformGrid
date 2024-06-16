@@ -461,7 +461,7 @@ MonoBehaviour:
       y: 0
       z: 0
     cellSize: 1
-    bitsPerAxis: 2
+    bitsPerAxis: 1
     elementCapacity: 1024
 --- !u!4 &918468517
 Transform:

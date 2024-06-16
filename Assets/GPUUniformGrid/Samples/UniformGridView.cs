@@ -14,10 +14,12 @@ public class UniformGridView : MonoBehaviour {
 
     #region unity
     void OnEnable() {
-        grid = new GPUUniformGrid();
-
-        grid.InitializeGrid(tuner.gridOffset, tuner.cellSize, tuner.bitsPerAxis);
-        grid.InitializeElements(tuner.elementCapacity);
+        var gridParams = new UniformGridParams(
+            tuner.gridOffset, 
+            tuner.cellSize, 
+            tuner.bitsPerAxis, 
+            tuner.elementCapacity);
+        grid = new GPUUniformGrid(gridParams);
 
         StartCoroutine(CoReadbackUniformGrid(grid));
     }
@@ -53,6 +55,7 @@ public class UniformGridView : MonoBehaviour {
                     break;
                 }
             }
+            log.AppendLine();
 
             log.AppendLine($"Cell next: len{cellNext.Length}");
             for (int i = 0; i < cellNext.Length; i++) {
@@ -62,8 +65,7 @@ public class UniformGridView : MonoBehaviour {
                     break;
                 }
             }
-
-            log.AppendLine($"About NativeArray");
+            log.AppendLine();
 
             Debug.Log(log);
         } finally {
