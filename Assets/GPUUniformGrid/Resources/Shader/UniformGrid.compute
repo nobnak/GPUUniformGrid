@@ -1,7 +1,7 @@
 #pragma kernel InitializeCells
 #pragma kernel InitializeElements
 
-#include "../ShaderLibrary/UniformGrid.hlsl"
+#include "../../ShaderLibrary/UniformGrid.hlsl"
 
 [numthreads(64,1,1)]
 void InitializeCells (uint3 id : SV_DispatchThreadID) {

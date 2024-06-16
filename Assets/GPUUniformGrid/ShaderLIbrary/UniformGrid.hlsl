@@ -10,7 +10,6 @@ uint UniformGrid_nElements;
 
 float3 UniformGrid_cellOffset;
 float3 UniformGrid_cellSize;
-uint UniformGrid_CellIDMask;
 
 uint UniformGrid_GetCellID(float3 position) {
 	float3 cellPosition = (position - UniformGrid_cellOffset) / UniformGrid_cellSize;
