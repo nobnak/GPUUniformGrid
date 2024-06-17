@@ -31,8 +31,8 @@ namespace Nobnak.GPU.UniformGrid {
             if (CellSize < 1e-3f || 1e3f < CellSize) {
                 Debug.LogWarning($"cellSize is too small or too large. cellSize={CellSize}");
             }
-            if (bitsPerAxis < 1 || 10 < bitsPerAxis) {
-                Debug.LogWarning($"bitsPerAxis is too small or too large. bitsPerAxis={bitsPerAxis}");
+            if (10 < bitsPerAxis) {
+                Debug.LogWarning($"bitsPerAxis is too large. bitsPerAxis={bitsPerAxis}");
             }
             if (elementCapacity < 1 || 1e9 < elementCapacity) {
                 Debug.LogWarning($"elementCapacity is too small or too large. elementCapacity={elementCapacity}");

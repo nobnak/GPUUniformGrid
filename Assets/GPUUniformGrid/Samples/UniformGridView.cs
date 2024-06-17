@@ -55,6 +55,7 @@ public class UniformGridView : MonoBehaviour {
         if (grid != null) {
             grid.Dispose();
             grid = null;
+            events.OnGridChanged?.Invoke(null);
         }
     }
     #endregion
