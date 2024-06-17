@@ -14,39 +14,50 @@ public class UniformGridView : MonoBehaviour {
 
     #region unity
     void OnEnable() {
-        var gridParams = new UniformGridParams(
-            tuner.gridOffset, 
-            tuner.cellSize, 
-            tuner.bitsPerAxis, 
-            tuner.elementCapacity);
-        grid = new GPUUniformGrid(gridParams);
-
-        StartCoroutine(CoReadbackUniformGrid(grid));
     }
     void OnDisable() {
+        DisposeGrid();
+    }
+    void OnValidate() {
+        DisposeGrid();
+    }
+    void OnDrawGizmos() {
+        if (grid == null || !isActiveAndEnabled) return;
+
+        var gridParams = grid.gridParams;
+        var cellSize = gridParams.cellSize;
+        var cellCount = gridParams.NumberOfCellsPerAxis;
+        var gridSize = cellSize * cellCount;
+
+        var gridEnd0 = gridParams.gridOffset;
+        var gridEnd1 = gridParams.gridOffset + gridSize;
+        var gridCenter = (gridEnd0 + gridEnd1) * 0.5f;
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(gridCenter, new float3(gridSize));
+    }
+    void Update() {
+        if (grid == null) {
+            var gridParams = new UniformGridParams(
+                tuner.gridOffset,
+                tuner.cellSize,
+                tuner.bitsPerAxis,
+                tuner.elementCapacity);
+            grid = new GPUUniformGrid(gridParams);
+        }
+
         if (grid != null) {
-            grid.Dispose();
-            grid = null;
+            grid.Reset();
+            grid.SetParamsGlobal();
         }
     }
     #endregion
 
-    #region routine
-    IEnumerator CoReadbackUniformGrid(GPUUniformGrid grid) {
-        CPUUniformGrid cpuGrid = null;
-        foreach (var _ in grid.ToCPU(v => cpuGrid = v))
-            yield return null;
-
-        try {
-            if (cpuGrid == null) {
-                Debug.LogWarning("Failed to readback");
-                yield break;
-            }
-
-            Debug.Log(cpuGrid);
-        } finally {
-            if (cpuGrid != null)
-                cpuGrid.Dispose();
+    #region methods
+    private void DisposeGrid() {
+        if (grid != null) {
+            grid.Dispose();
+            grid = null;
         }
     }
     #endregion
@@ -63,4 +74,43 @@ public class UniformGridView : MonoBehaviour {
     }
 
     #endregion
+
+#if UNITY_EDITOR
+    [UnityEditor.CustomEditor(typeof(UniformGridView))]
+    public class UniformGridViewEditor : UnityEditor.Editor {
+        public override void OnInspectorGUI() {
+            base.OnInspectorGUI();
+            var view = target as UniformGridView;
+            var isEnabled = view.grid != null && view.grid != null;
+            GUI.enabled = isEnabled;
+            if (GUILayout.Button("Readback")) {
+                view.StartCoroutine(CoReadbackUniformGrid(view.grid));
+            }
+        }
+
+        #region routine
+        IEnumerator CoReadbackUniformGrid(GPUUniformGrid grid) {
+            CPUUniformGrid cpuGrid = null;
+            try {
+                var task = grid.ToCPU();
+                while (!task.IsCompleted) {
+                    yield return null;
+                }
+                if (task.IsFaulted) {
+                    Debug.LogError($"Error in reading uniform grid");
+                    yield break;
+                }
+                if (task.IsCompletedSuccessfully) {
+                    cpuGrid = task.Result;
+                    Debug.Log(cpuGrid);
+                }
+            } finally {
+                if (cpuGrid != null) {
+                    cpuGrid.Dispose();
+                }
+            }
+        }
+        #endregion
+    }
+#endif
 }

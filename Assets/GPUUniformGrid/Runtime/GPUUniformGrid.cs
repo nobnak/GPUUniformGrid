@@ -33,34 +33,18 @@ namespace Nobnak.GPU.UniformGrid {
             ResetCellHeadBuffer();
             ResetCellNextBuffer();
         }
+        public void SetParams(int kernel = -1) => SetParams(compute, gridParams, kernel);
+        public void SetParamsGlobal() {
+            Shader.SetGlobalBuffer(P_UniformGrid_cellHead, cellHead);
+            Shader.SetGlobalInteger(P_UniformGrid_nCells, cellHead.count);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellNext, cellNext);
+            Shader.SetGlobalInteger(P_UniformGrid_nElements, cellNext.count);
 
-        public IEnumerable ToCPU(System.Action<CPUUniformGrid> callback) {
-            var naCellHead = new NativeArray<uint>(cellHead.count, Allocator.Persistent);
-            var naCellNext = new NativeArray<uint>(cellNext.count, Allocator.Persistent);
-            var reqCellHead = AsyncGPUReadback.RequestIntoNativeArray(ref naCellHead, cellHead);
-            var reqCellNext = AsyncGPUReadback.RequestIntoNativeArray(ref naCellNext, cellNext);
-            while (true) {
-                yield return null;
-
-                reqCellHead.Update();
-                reqCellNext.Update();
-
-                if (reqCellHead.hasError) {
-                    Debug.LogError($"GPU readback error detected.");
-                    yield break;
-                }
-                if (reqCellNext.hasError) {
-                    Debug.LogError($"GPU readback error detected.");
-                    yield break;
-                }
-
-                if (reqCellHead.done && reqCellNext.done) {
-                    callback?.Invoke(new CPUUniformGrid(gridParams, naCellHead, naCellNext));
-                    yield break;
-                }
-            }
+            var cellSize = gridParams.cellSize;
+            var gridOffset = gridParams.gridOffset;
+            Shader.SetGlobalVector(P_UniformGrid_cellOffset, new float4(gridOffset, 0));
+            Shader.SetGlobalVector(P_UniformGrid_cellSize, new float4(cellSize));
         }
-
 
         #region IDisposable
         public void Dispose() {
