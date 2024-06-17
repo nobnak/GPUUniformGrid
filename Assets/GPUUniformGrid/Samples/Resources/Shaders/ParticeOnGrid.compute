@@ -1,0 +1,17 @@
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel InsertParticle
+
+#include "Assets/GPUUniformGrid/ShaderLIbrary/UniformGrid.hlsl"
+
+uint _ParticlePositions_Length;
+StructuredBuffer<float3> _ParticlePositions;
+
+[numthreads(64,1,1)]
+void InsertParticle (uint3 id : SV_DispatchThreadID) {
+	if (id.x >= _ParticlePositions_Length)
+		return;
+
+	float3 pos = _ParticlePositions[id.x];
+	uint cellID = UniformGrid_GetCellID(pos);
+	UniformGrid_InsertElementIDAtCellID(cellID, id.x);
+}

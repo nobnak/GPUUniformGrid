@@ -7,7 +7,7 @@ using UnityEngine;
 namespace Nobnak.GPU.UniformGrid {
 
     public class CPUUniformGrid : System.IDisposable {
-
+        private const int LOG_LENGTH_LIMIT = 100;
         public readonly UniformGridParams gridParams;
 
         public NativeArray<uint> CellHead { get; protected set; }
@@ -40,7 +40,7 @@ namespace Nobnak.GPU.UniformGrid {
             log.AppendLine($"Cell head: len={CellHead.Length}");
             for (int i = 0; i < CellHead.Length; i++) {
                 log.Append($"{(int)CellHead[i]}, ");
-                if (i >= 10) {
+                if (i >= LOG_LENGTH_LIMIT) {
                     log.AppendLine("...");
                     break;
                 }
@@ -50,7 +50,7 @@ namespace Nobnak.GPU.UniformGrid {
             log.AppendLine($"Cell next: len={CellNext.Length}");
             for (int i = 0; i < CellNext.Length; i++) {
                 log.Append($"{(int)CellNext[i]}, ");
-                if (i >= 10) {
+                if (i >= LOG_LENGTH_LIMIT) {
                     log.AppendLine("...");
                     break;
                 }

@@ -8,6 +8,7 @@ using System.Text;
 
 public class UniformGridView : MonoBehaviour {
 
+    [SerializeField] protected Events events = new();
     [SerializeField] protected Tuner tuner = new();
 
     protected GPUUniformGrid grid;
@@ -22,12 +23,12 @@ public class UniformGridView : MonoBehaviour {
         DisposeGrid();
     }
     void OnDrawGizmos() {
-        if (grid == null || !isActiveAndEnabled) return;
+        if (grid == null || !isActiveAndEnabled) {
+            return;
+        }
 
         var gridParams = grid.gridParams;
-        var cellSize = gridParams.cellSize;
-        var cellCount = gridParams.NumberOfCellsPerAxis;
-        var gridSize = cellSize * cellCount;
+        var gridSize = gridParams.gridSize;
 
         var gridEnd0 = gridParams.gridOffset;
         var gridEnd1 = gridParams.gridOffset + gridSize;
@@ -40,15 +41,11 @@ public class UniformGridView : MonoBehaviour {
         if (grid == null) {
             var gridParams = new UniformGridParams(
                 tuner.gridOffset,
-                tuner.cellSize,
+                tuner.gridSize,
                 tuner.bitsPerAxis,
                 tuner.elementCapacity);
             grid = new GPUUniformGrid(gridParams);
-        }
-
-        if (grid != null) {
-            grid.Reset();
-            grid.SetParamsGlobal();
+            events.OnGridChanged?.Invoke(grid);
         }
     }
     #endregion
@@ -64,9 +61,13 @@ public class UniformGridView : MonoBehaviour {
 
     #region declarations
     [System.Serializable]
+    public class Events {
+        public UnityEngine.Events.UnityEvent<GPUUniformGrid> OnGridChanged;
+    }
+    [System.Serializable]
     public class Tuner {
         public float3 gridOffset;
-        public float cellSize;
+        public float gridSize;
         [Range(1, 10)]
         public uint bitsPerAxis;
 
