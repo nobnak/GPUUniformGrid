@@ -15,8 +15,8 @@ namespace Nobnak.GPU.UniformGrid {
         protected int kernelInitializeCells;
         protected int kernelInitializeElements;
 
-        GraphicsBuffer cellHead;
-        GraphicsBuffer cellNext;
+        public GraphicsBuffer cellHead { get; protected set; }
+        public GraphicsBuffer cellNext { get; protected set; }
 
         public GPUUniformGrid(UniformGridParams gridParams) {
             this.gridParams = gridParams;
@@ -25,8 +25,9 @@ namespace Nobnak.GPU.UniformGrid {
             this.kernelInitializeCells = compute.FindKernel(K_InitializeCells);
             this.kernelInitializeElements = compute.FindKernel(K_InitializeElements);
 
-            InitializeGrid(gridParams);
-            InitializeElements(gridParams);
+            this.cellHead = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.TotalNumberOfCells, 4);
+            this.cellNext = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.elementCapacity, 4);
+            Reset();
         }
         public void Reset() {
             ResetCellHeadBuffer();
@@ -54,7 +55,7 @@ namespace Nobnak.GPU.UniformGrid {
                 }
 
                 if (reqCellHead.done && reqCellNext.done) {
-                    callback?.Invoke(new CPUUniformGrid(naCellHead, naCellNext));
+                    callback?.Invoke(new CPUUniformGrid(gridParams, naCellHead, naCellNext));
                     yield break;
                 }
             }
@@ -69,16 +70,6 @@ namespace Nobnak.GPU.UniformGrid {
         #endregion
 
         #region methods
-        protected void InitializeGrid(UniformGridParams gridParams) {
-            DisposeCellHeadBuffer();
-            cellHead = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.TotalNumberOfCells, 4);
-            ResetCellHeadBuffer();
-        }
-        protected void InitializeElements(UniformGridParams gridParams) {
-            DisposeCellNextBuffer();
-            cellNext = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.elementCapacity, 4);
-            ResetCellNextBuffer();
-        }
         protected void ResetCellHeadBuffer() {
             if (cellHead == null) {
                 Debug.LogWarning("cellHead is null. Please call InitializeGrid first.");
@@ -123,9 +114,10 @@ namespace Nobnak.GPU.UniformGrid {
                 compute.SetInt(P_UniformGrid_nElements, cellNext.count);
             }
 
-            var CellSize = gridParams.cellSize;
-            compute.SetVector(P_UniformGrid_cellOffset, new float4(gridParams.gridOffset, 0));
-            compute.SetVector(P_UniformGrid_cellSize, new float4(CellSize, CellSize, CellSize, 0));
+            var cellSize = gridParams.cellSize;
+            var gridOffset = gridParams.gridOffset;
+            compute.SetFloats(P_UniformGrid_cellOffset, gridOffset.x, gridOffset.y, gridOffset.z);
+            compute.SetFloats(P_UniformGrid_cellSize, cellSize, cellSize, cellSize);
         }
 
         #endregion

@@ -43,31 +43,7 @@ public class UniformGridView : MonoBehaviour {
                 yield break;
             }
 
-            var log = new StringBuilder();
-
-            var cellHead = cpuGrid.CellHead;
-            var cellNext = cpuGrid.CellNext;
-            log.AppendLine($"Cell head: len={cellHead.Length}");
-            for (int i = 0; i < cellHead.Length; i++) {
-                log.Append($"{(int)cellHead[i]}, ");
-                if (i >= 10) {
-                    log.AppendLine("...");
-                    break;
-                }
-            }
-            log.AppendLine();
-
-            log.AppendLine($"Cell next: len{cellNext.Length}");
-            for (int i = 0; i < cellNext.Length; i++) {
-                log.Append($"{(int)cellNext[i]}, ");
-                if (i >= 10) {
-                    log.AppendLine("...");
-                    break;
-                }
-            }
-            log.AppendLine();
-
-            Debug.Log(log);
+            Debug.Log(cpuGrid);
         } finally {
             if (cpuGrid != null)
                 cpuGrid.Dispose();
