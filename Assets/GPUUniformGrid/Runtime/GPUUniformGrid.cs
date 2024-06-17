@@ -41,7 +41,7 @@ namespace Nobnak.GPU.UniformGrid {
             Shader.SetGlobalInteger(P_UniformGrid_nElements, cellNext.count);
 
             var cellSize = gridParams.CellSize;
-            var gridOffset = gridParams.gridOffset;
+            var gridOffset = gridParams.GridOffset;
             Shader.SetGlobalVector(P_UniformGrid_cellOffset, new float4(gridOffset, 0));
             Shader.SetGlobalVector(P_UniformGrid_cellSize, new float4(cellSize));
         }
@@ -99,7 +99,7 @@ namespace Nobnak.GPU.UniformGrid {
             }
 
             var cellSize = gridParams.CellSize;
-            var gridOffset = gridParams.gridOffset;
+            var gridOffset = gridParams.GridOffset;
             compute.SetFloats(P_UniformGrid_cellOffset, gridOffset.x, gridOffset.y, gridOffset.z);
             compute.SetFloats(P_UniformGrid_cellSize, cellSize, cellSize, cellSize);
         }

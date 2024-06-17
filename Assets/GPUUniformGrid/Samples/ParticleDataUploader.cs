@@ -55,8 +55,9 @@ public class ParticleDataUploader : MonoBehaviour {
             particlePositions[i] = particles[i].position;
         }
         particlePositionsBuffer.SetData(particlePositions);
-        
+
         //DumpParticleBuffer(elemtCapacity, particleCount);
+        Debug.Log($"{grid.gridParams}");
 
         grid.Reset();
         grid.SetParamsGlobal();

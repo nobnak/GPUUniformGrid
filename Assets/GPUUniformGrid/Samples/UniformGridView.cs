@@ -30,8 +30,8 @@ public class UniformGridView : MonoBehaviour {
         var gridParams = grid.gridParams;
         var gridSize = gridParams.gridSize;
 
-        var gridEnd0 = gridParams.gridOffset;
-        var gridEnd1 = gridParams.gridOffset + gridSize;
+        var gridEnd0 = gridParams.GridOffset;
+        var gridEnd1 = gridParams.GridOffset + gridSize;
         var gridCenter = (gridEnd0 + gridEnd1) * 0.5f;
 
         Gizmos.color = Color.green;
@@ -40,7 +40,7 @@ public class UniformGridView : MonoBehaviour {
     void Update() {
         if (grid == null) {
             var gridParams = new UniformGridParams(
-                tuner.gridOffset,
+                tuner.gridCenter,
                 tuner.gridSize,
                 tuner.bitsPerAxis,
                 tuner.elementCapacity);
@@ -66,9 +66,9 @@ public class UniformGridView : MonoBehaviour {
     }
     [System.Serializable]
     public class Tuner {
-        public float3 gridOffset;
+        public float3 gridCenter;
         public float gridSize;
-        [Range(1, 10)]
+        [Range(0, 10)]
         public uint bitsPerAxis;
 
         public uint elementCapacity = 1024;

@@ -8,11 +8,11 @@ RWByteAddressBuffer UniformGrid_cellNext;
 uint UniformGrid_nCells;
 uint UniformGrid_nElements;
 
-float3 UniformGrid_cellOffset;
-float3 UniformGrid_cellSize;
+float4 UniformGrid_cellOffset;
+float4 UniformGrid_cellSize;
 
 uint UniformGrid_GetCellID(float3 position) {
-	float3 cellPosition = (position - UniformGrid_cellOffset) / UniformGrid_cellSize;
+	float3 cellPosition = (position - UniformGrid_cellOffset.xyz) / UniformGrid_cellSize.xyz;
 	uint3 cellIndex = uint3(cellPosition);
 	uint cellID = MortonCode_Encode3(cellIndex);
 	return cellID;
