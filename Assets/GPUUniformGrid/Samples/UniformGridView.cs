@@ -9,6 +9,7 @@ using System.Text;
 public class UniformGridView : MonoBehaviour {
 
     [SerializeField] protected Events events = new();
+    [SerializeField] protected Links links = new();
     [SerializeField] protected Tuner tuner = new();
 
     protected GPUUniformGrid grid;
@@ -47,6 +48,19 @@ public class UniformGridView : MonoBehaviour {
             grid = new GPUUniformGrid(gridParams);
             events.OnGridChanged?.Invoke(grid);
         }
+        if (grid != null) {
+            var cellDensityRp = new RenderParams(links.cellDensity);
+            cellDensityRp.worldBounds = new Bounds(float3.zero, new float3(1000));
+            cellDensityRp.matProps = new();
+
+            var gridParams = grid.gridParams;
+            grid.SetParams(cellDensityRp.matProps);
+            Graphics.RenderPrimitives(cellDensityRp,
+                MeshTopology.Lines,
+                2, (int)gridParams.TotalNumberOfCells);
+
+            Debug.Log("Render lines");
+        }
     }
     #endregion
 
@@ -64,6 +78,10 @@ public class UniformGridView : MonoBehaviour {
     [System.Serializable]
     public class Events {
         public UnityEngine.Events.UnityEvent<GPUUniformGrid> OnGridChanged;
+    }
+    [System.Serializable]
+    public class Links {
+        public Material cellDensity;
     }
     [System.Serializable]
     public class Tuner {

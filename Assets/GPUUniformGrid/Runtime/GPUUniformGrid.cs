@@ -33,17 +33,36 @@ namespace Nobnak.GPU.UniformGrid {
             ResetCellHeadBuffer();
             ResetCellNextBuffer();
         }
-        public void SetParams(int kernel = -1) => SetParams(compute, gridParams, kernel);
+        public void SetParams(ComputeShader compute, int kernel = -1) {
+            compute.SetBuffer(kernel, P_UniformGrid_cellHead, cellHead);
+            compute.SetInt(P_UniformGrid_cellHead_Len, cellHead != null ? cellHead.count : 0);
+            compute.SetBuffer(kernel, P_UniformGrid_cellNext, cellNext);
+            compute.SetInt(P_UniformGrid_cellNext_Len, cellNext != null ? cellNext.count : 0);
+
+            compute.SetVector(P_UniformGrid_cellOffset, new float4(gridParams.GridOffset, 0));
+            compute.SetVector(P_UniformGrid_cellSize, new float4(gridParams.CellSize));
+            compute.SetInt(P_UniformGrid_cellCount, (int)gridParams.NumberOfCellsPerAxis);
+
+        }
+        public void SetParams(MaterialPropertyBlock block) {
+            block.SetBuffer(P_UniformGrid_cellHead, cellHead);
+            block.SetInteger(P_UniformGrid_cellHead_Len, cellHead != null ? cellHead.count : 0);
+            block.SetBuffer(P_UniformGrid_cellNext, cellNext);
+            block.SetInteger(P_UniformGrid_cellNext_Len, cellNext != null ? cellNext.count : 0);
+
+            block.SetVector(P_UniformGrid_cellOffset, new float4(gridParams.GridOffset, 0));
+            block.SetVector(P_UniformGrid_cellSize, new float4(gridParams.CellSize));
+            block.SetInteger(P_UniformGrid_cellCount, (int)gridParams.NumberOfCellsPerAxis);
+        }
         public void SetParamsGlobal() {
             Shader.SetGlobalBuffer(P_UniformGrid_cellHead, cellHead);
-            Shader.SetGlobalInteger(P_UniformGrid_nCells, cellHead.count);
+            Shader.SetGlobalInteger(P_UniformGrid_cellHead_Len, cellHead != null ? cellHead.count : 0);
             Shader.SetGlobalBuffer(P_UniformGrid_cellNext, cellNext);
-            Shader.SetGlobalInteger(P_UniformGrid_nElements, cellNext.count);
+            Shader.SetGlobalInteger(P_UniformGrid_cellNext_Len, cellNext != null ? cellNext.count : 0);
 
-            var cellSize = gridParams.CellSize;
-            var gridOffset = gridParams.GridOffset;
-            Shader.SetGlobalVector(P_UniformGrid_cellOffset, new float4(gridOffset, 0));
-            Shader.SetGlobalVector(P_UniformGrid_cellSize, new float4(cellSize));
+            Shader.SetGlobalVector(P_UniformGrid_cellOffset, new float4(gridParams.GridOffset, 0));
+            Shader.SetGlobalVector(P_UniformGrid_cellSize, new float4(gridParams.CellSize));
+            Shader.SetGlobalInteger(P_UniformGrid_cellCount, (int)gridParams.NumberOfCellsPerAxis);
         }
 
         #region IDisposable
@@ -59,7 +78,7 @@ namespace Nobnak.GPU.UniformGrid {
                 Debug.LogWarning("cellHead is null. Please call InitializeGrid first.");
                 return;
             }
-            SetParams(compute, gridParams, kernelInitializeCells);
+            SetParams(compute, kernelInitializeCells);
             compute.Dispatch(kernelInitializeCells,
                 (cellHead.count - 1) / (int)ThreadGroupSize.x + 1, 1, 1);
         }
@@ -68,7 +87,7 @@ namespace Nobnak.GPU.UniformGrid {
                 Debug.LogWarning("cellNext is null. Please call InitializeElements first.");
                 return;
             }
-            SetParams(compute, gridParams, kernelInitializeElements);
+            SetParams(compute, kernelInitializeElements);
             compute.Dispatch(kernelInitializeElements,
                 (cellNext.count - 1) / (int)ThreadGroupSize.x + 1, 1, 1);
         }
@@ -86,24 +105,6 @@ namespace Nobnak.GPU.UniformGrid {
             cellNext = null;
         }
 
-        private void SetParams(ComputeShader compute, UniformGridParams gridParams, int kernel = -1) {
-            if (cellHead != null) {
-                if (kernel >= 0)
-                    compute.SetBuffer(kernel, P_UniformGrid_cellHead, cellHead);
-                compute.SetInt(P_UniformGrid_nCells, cellHead.count);
-            }
-            if (cellNext != null) {
-                if(kernel >= 0)
-                    compute.SetBuffer(kernel, P_UniformGrid_cellNext, cellNext);
-                compute.SetInt(P_UniformGrid_nElements, cellNext.count);
-            }
-
-            var cellSize = gridParams.CellSize;
-            var gridOffset = gridParams.GridOffset;
-            compute.SetFloats(P_UniformGrid_cellOffset, gridOffset.x, gridOffset.y, gridOffset.z);
-            compute.SetFloats(P_UniformGrid_cellSize, cellSize, cellSize, cellSize);
-        }
-
         #endregion
 
         #region declarations
@@ -115,12 +116,12 @@ namespace Nobnak.GPU.UniformGrid {
 
         public static readonly int P_UniformGrid_cellHead = Shader.PropertyToID("UniformGrid_cellHead");
         public static readonly int P_UniformGrid_cellNext = Shader.PropertyToID("UniformGrid_cellNext");
-        public static readonly int P_UniformGrid_nCells = Shader.PropertyToID("UniformGrid_nCells");
-        public static readonly int P_UniformGrid_nElements = Shader.PropertyToID("UniformGrid_nElements");
+        public static readonly int P_UniformGrid_cellHead_Len = Shader.PropertyToID("UniformGrid_cellHead_Len");
+        public static readonly int P_UniformGrid_cellNext_Len = Shader.PropertyToID("UniformGrid_cellNext_Len");
 
         public static readonly int P_UniformGrid_cellOffset = Shader.PropertyToID("UniformGrid_cellOffset");
         public static readonly int P_UniformGrid_cellSize = Shader.PropertyToID("UniformGrid_cellSize");
-        public static readonly int P_UniformGrid_CellIDMask = Shader.PropertyToID("UniformGrid_CellIDMask");
+        public static readonly int P_UniformGrid_cellCount = Shader.PropertyToID("UniformGrid_cellCount");
         #endregion
     }
 

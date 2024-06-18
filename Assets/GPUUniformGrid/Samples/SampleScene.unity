@@ -471,13 +471,15 @@ MonoBehaviour:
             m_StringArgument: 
             m_BoolArgument: 0
           m_CallState: 1
+  links:
+    cellDensity: {fileID: 2100000, guid: ed1ce20de4de8644dbfc92ff7f87d69d, type: 2}
   tuner:
-    gridOffset:
+    gridCenter:
       x: 0
       y: 0
       z: 0
     gridSize: 10
-    bitsPerAxis: 1
+    bitsPerAxis: 2
     elementCapacity: 1024
 --- !u!4 &918468517
 Transform:

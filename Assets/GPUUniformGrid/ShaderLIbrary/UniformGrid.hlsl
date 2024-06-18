@@ -5,11 +5,12 @@
 
 RWByteAddressBuffer UniformGrid_cellHead;
 RWByteAddressBuffer UniformGrid_cellNext;
-uint UniformGrid_nCells;
-uint UniformGrid_nElements;
+uint UniformGrid_cellHead_Len;
+uint UniformGrid_cellNext_Len;
 
 float4 UniformGrid_cellOffset;
 float4 UniformGrid_cellSize;
+uint UniformGrid_cellCount;
 
 uint UniformGrid_GetCellID(float3 position) {
 	float3 cellPosition = (position - UniformGrid_cellOffset.xyz) / UniformGrid_cellSize.xyz;
