@@ -1,6 +1,7 @@
 Shader "Unlit/CellDensity" {
     Properties {
-        _Color ("Color", Color) = (1,1,1,1)
+        _Color ("Color", Color) = (0,1,0,1)
+        _ColorOverflow ("Color Overflow", Color) = (1,0,0,0)
         _Scale ("Scale", Float) = 1
     }
     SubShader {
@@ -25,6 +26,7 @@ Shader "Unlit/CellDensity" {
 
             CBUFFER_START(UnityPerMaterial)
             float4 _Color;
+            float4 _ColorOverflow;
             float _Scale;
             CBUFFER_END
 
@@ -37,19 +39,19 @@ Shader "Unlit/CellDensity" {
 
                 uint elementID = UniformGrid_GetHeadElementID(cellID);
                 uint elementCount = 0;
-                for (uint i = 0; i < 4; i++) {
+                for (uint i = 0; i < 8; i++) {
                     if (elementID == UniformGrid_InitValue) break;
                     elementID = UniformGrid_GetNextElementID(elementID);
                     elementCount++;
                 }
                 
-                float t = saturate((float)elementCount / 4.0);
+                float t = elementCount / 4.0;
                 float3 pos = UniformGrid_cellOffset + UniformGrid_cellSize * (cellIndex + float3(0, 0.95, 0));
-                pos.x += vertexID * t * UniformGrid_cellSize.x;
+                pos.x += vertexID * saturate(t) * UniformGrid_cellSize.x;
 
                 v2f o;
                 o.vertex = mul(UNITY_MATRIX_VP, float4(pos, 1));
-                o.color = _Color;
+                o.color = (t > 1) ? _ColorOverflow : _Color;
                 return o;
             }
 
