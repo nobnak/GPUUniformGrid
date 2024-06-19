@@ -60,6 +60,7 @@ namespace Nobnak.GPU.UniformGrid {
             log.AppendLine($"  - GridOffset={GridOffset}");
             log.AppendLine($"  - CellSize={CellSize}");
             log.AppendLine($"  - NumberOfCellsPerAxis={NumberOfCellsPerAxis}");
+            log.AppendLine($"  - TotalNumberOfCells={TotalNumberOfCells}");
             return log.ToString();
         }
         #endregion

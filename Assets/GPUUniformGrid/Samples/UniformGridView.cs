@@ -58,8 +58,6 @@ public class UniformGridView : MonoBehaviour {
             Graphics.RenderPrimitives(cellDensityRp,
                 MeshTopology.Lines,
                 2, (int)gridParams.TotalNumberOfCells);
-
-            Debug.Log("Render lines");
         }
     }
     #endregion

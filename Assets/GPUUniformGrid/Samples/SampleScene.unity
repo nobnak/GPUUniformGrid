@@ -158,7 +158,7 @@ Camera:
   m_GameObject: {fileID: 330585543}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
+  m_ClearFlags: 2
   m_BackGroundColor: {r: 0, g: 0, b: 0, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
@@ -479,7 +479,7 @@ MonoBehaviour:
       y: 0
       z: 0
     gridSize: 10
-    bitsPerAxis: 2
+    bitsPerAxis: 1
     elementCapacity: 1024
 --- !u!4 &918468517
 Transform:
@@ -1426,7 +1426,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 3
+      scalar: 1
       minScalar: 10
       maxCurve:
         serializedVersion: 2

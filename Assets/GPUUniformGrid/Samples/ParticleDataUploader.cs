@@ -60,7 +60,7 @@ public class ParticleDataUploader : MonoBehaviour {
         //Debug.Log($"{grid.gridParams}");
 
         grid.Reset();
-        grid.SetParamsGlobal();
+        grid.SetParams(cs, k_InsertParticle);
         cs.SetInt(P_ParticlePositions_Length, particleCount);
         cs.SetBuffer(k_InsertParticle, P_ParticlePositions, particlePositionsBuffer);
         cs.Dispatch(k_InsertParticle, (particleCount - 1) / (int)gs_InsertParticle + 1, 1, 1);

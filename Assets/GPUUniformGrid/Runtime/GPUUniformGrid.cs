@@ -34,10 +34,12 @@ namespace Nobnak.GPU.UniformGrid {
             ResetCellNextBuffer();
         }
         public void SetParams(ComputeShader compute, int kernel = -1) {
-            compute.SetBuffer(kernel, P_UniformGrid_cellHead, cellHead);
             compute.SetInt(P_UniformGrid_cellHead_Len, cellHead != null ? cellHead.count : 0);
-            compute.SetBuffer(kernel, P_UniformGrid_cellNext, cellNext);
             compute.SetInt(P_UniformGrid_cellNext_Len, cellNext != null ? cellNext.count : 0);
+            compute.SetBuffer(kernel, P_UniformGrid_cellHead_rw, cellHead);
+            compute.SetBuffer(kernel, P_UniformGrid_cellNext_rw, cellNext);
+            compute.SetBuffer(kernel, P_UniformGrid_cellHead_r, cellHead);
+            compute.SetBuffer(kernel, P_UniformGrid_cellNext_r, cellNext);
 
             compute.SetVector(P_UniformGrid_cellOffset, new float4(gridParams.GridOffset, 0));
             compute.SetVector(P_UniformGrid_cellSize, new float4(gridParams.CellSize));
@@ -45,20 +47,24 @@ namespace Nobnak.GPU.UniformGrid {
 
         }
         public void SetParams(MaterialPropertyBlock block) {
-            block.SetBuffer(P_UniformGrid_cellHead, cellHead);
             block.SetInteger(P_UniformGrid_cellHead_Len, cellHead != null ? cellHead.count : 0);
-            block.SetBuffer(P_UniformGrid_cellNext, cellNext);
             block.SetInteger(P_UniformGrid_cellNext_Len, cellNext != null ? cellNext.count : 0);
+            block.SetBuffer(P_UniformGrid_cellHead_rw, cellHead);
+            block.SetBuffer(P_UniformGrid_cellNext_rw, cellNext);
+            block.SetBuffer(P_UniformGrid_cellHead_r, cellHead);
+            block.SetBuffer(P_UniformGrid_cellNext_r, cellNext);
 
             block.SetVector(P_UniformGrid_cellOffset, new float4(gridParams.GridOffset, 0));
             block.SetVector(P_UniformGrid_cellSize, new float4(gridParams.CellSize));
             block.SetInteger(P_UniformGrid_cellCount, (int)gridParams.NumberOfCellsPerAxis);
         }
         public void SetParamsGlobal() {
-            Shader.SetGlobalBuffer(P_UniformGrid_cellHead, cellHead);
             Shader.SetGlobalInteger(P_UniformGrid_cellHead_Len, cellHead != null ? cellHead.count : 0);
-            Shader.SetGlobalBuffer(P_UniformGrid_cellNext, cellNext);
             Shader.SetGlobalInteger(P_UniformGrid_cellNext_Len, cellNext != null ? cellNext.count : 0);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellHead_rw, cellHead);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellNext_rw, cellNext);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellHead_r, cellHead);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellNext_r, cellNext);
 
             Shader.SetGlobalVector(P_UniformGrid_cellOffset, new float4(gridParams.GridOffset, 0));
             Shader.SetGlobalVector(P_UniformGrid_cellSize, new float4(gridParams.CellSize));
@@ -114,10 +120,12 @@ namespace Nobnak.GPU.UniformGrid {
 
         public static readonly uint3 ThreadGroupSize = new uint3(64, 1, 1);
 
-        public static readonly int P_UniformGrid_cellHead = Shader.PropertyToID("UniformGrid_cellHead");
-        public static readonly int P_UniformGrid_cellNext = Shader.PropertyToID("UniformGrid_cellNext");
         public static readonly int P_UniformGrid_cellHead_Len = Shader.PropertyToID("UniformGrid_cellHead_Len");
         public static readonly int P_UniformGrid_cellNext_Len = Shader.PropertyToID("UniformGrid_cellNext_Len");
+        public static readonly int P_UniformGrid_cellHead_rw = Shader.PropertyToID("UniformGrid_cellHead_rw");
+        public static readonly int P_UniformGrid_cellNext_rw = Shader.PropertyToID("UniformGrid_cellNext_rw");
+        public static readonly int P_UniformGrid_cellHead_r = Shader.PropertyToID("UniformGrid_cellHead_r");
+        public static readonly int P_UniformGrid_cellNext_r = Shader.PropertyToID("UniformGrid_cellNext_r");
 
         public static readonly int P_UniformGrid_cellOffset = Shader.PropertyToID("UniformGrid_cellOffset");
         public static readonly int P_UniformGrid_cellSize = Shader.PropertyToID("UniformGrid_cellSize");
