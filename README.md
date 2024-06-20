@@ -2,6 +2,9 @@
 
 A single-pass method of Uniform Grid construction on GPU based on the article [^1]. This asset is released as a UPM package[^2].
 
+[![Thumbnail](http://img.youtube.com/vi/NKYRA955oSE/hqdefault.jpg)](https://youtu.be/NKYRA955oSE)
+[![Thumbnail](http://img.youtube.com/vi/8GmqgaxiQ2g/hqdefault.jpg)](https://youtu.be/8GmqgaxiQ2g)
+
 ## Installation
 Add scoped repository:
 
