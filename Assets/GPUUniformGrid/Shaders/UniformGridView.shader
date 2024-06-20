@@ -1,4 +1,4 @@
-Shader "Unlit/CellDensity" {
+Shader "Unlit/UniformGridView" {
     Properties {
         _Color ("Color", Color) = (0,1,0,1)
         _ColorOverflow ("Color Overflow", Color) = (1,0,0,0)
@@ -18,7 +18,7 @@ Shader "Unlit/CellDensity" {
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "Assets/GPUUniformGrid/ShaderLIbrary/UniformGrid.hlsl"
+            #include "../ShaderLibrary/UniformGrid.hlsl"
 
             static const float3 box_vertices[] = {
                 float3(0, 0, 0), 

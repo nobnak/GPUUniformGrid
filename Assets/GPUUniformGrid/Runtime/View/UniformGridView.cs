@@ -24,41 +24,19 @@ public class UniformGridView : MonoBehaviour {
         DisposeGrid();
     }
     void OnDrawGizmos() {
-        if (grid == null || !isActiveAndEnabled) {
-            return;
-        }
-
-        var gridParams = grid.gridParams;
-        var gridSize = gridParams.gridSize;
-
-        var gridEnd0 = gridParams.GridOffset;
-        var gridEnd1 = gridParams.GridOffset + gridSize;
-        var gridCenter = (gridEnd0 + gridEnd1) * 0.5f;
-
-        Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(gridCenter, new float3(gridSize));
+        if ((tuner.visualize & VisualizeFlags.Volume) != 0)
+            VisualizeVolume();
     }
+
     void Update() {
         if (grid == null) {
-            var gridParams = new UniformGridParams(
-                tuner.gridCenter,
-                tuner.gridSize,
-                tuner.bitsPerAxis,
-                tuner.elementCapacity);
+            var gridParams = GenerateParams();
             grid = new GPUUniformGrid(gridParams);
             events.OnGridChanged?.Invoke(grid);
         }
-        if (grid != null) {
-            var cellDensityRp = new RenderParams(links.cellDensity);
-            cellDensityRp.worldBounds = new Bounds(float3.zero, new float3(1000));
-            cellDensityRp.matProps = new();
 
-            var gridParams = grid.gridParams;
-            grid.SetParams(cellDensityRp.matProps);
-            Graphics.RenderPrimitives(cellDensityRp,
-                MeshTopology.Lines,
-                2, (int)gridParams.TotalNumberOfCells);
-        }
+        if ((tuner.visualize & VisualizeFlags.Grid) != 0)
+            VisualizeGrid();
     }
     #endregion
 
@@ -69,6 +47,41 @@ public class UniformGridView : MonoBehaviour {
             grid = null;
             events.OnGridChanged?.Invoke(null);
         }
+    }
+
+    private UniformGridParams GenerateParams() {
+        return new UniformGridParams(
+            tuner.gridCenter,
+            tuner.gridSize,
+            tuner.bitsPerAxis,
+            tuner.elementCapacity);
+    }
+
+    private void VisualizeGrid() {
+        if (grid != null) {
+            var cellDensityRp = new RenderParams(links.cellDensity);
+            cellDensityRp.worldBounds = new Bounds(float3.zero, new float3(1000));
+            if (cellDensityRp.matProps == null)
+                cellDensityRp.matProps = new();
+
+            var gridParams = grid.gridParams;
+            grid.SetParams(cellDensityRp.matProps);
+            Graphics.RenderPrimitives(cellDensityRp,
+                MeshTopology.Lines,
+                2, (int)gridParams.TotalNumberOfCells);
+        }
+    }
+
+    private void VisualizeVolume() {
+        var gridParams = GenerateParams();
+        var gridSize = gridParams.gridSize;
+
+        var gridEnd0 = gridParams.GridOffset;
+        var gridEnd1 = gridParams.GridOffset + gridSize;
+        var gridCenter = (gridEnd0 + gridEnd1) * 0.5f;
+
+        Gizmos.color = Color.grey;
+        Gizmos.DrawWireCube(gridCenter, new float3(gridSize));
     }
     #endregion
 
@@ -81,8 +94,15 @@ public class UniformGridView : MonoBehaviour {
     public class Links {
         public Material cellDensity;
     }
+    [System.Flags]
+    public enum VisualizeFlags {
+        Default = 0,
+        Volume = 1 << 0,
+        Grid = 1 << 1,
+    }
     [System.Serializable]
     public class Tuner {
+        public VisualizeFlags visualize;
         public float3 gridCenter;
         public float gridSize;
         [Range(0, 10)]

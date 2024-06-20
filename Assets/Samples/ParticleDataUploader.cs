@@ -90,7 +90,7 @@ public class ParticleDataUploader : MonoBehaviour {
     #endregion
 
     #region declarations
-    public const string CS = "Shaders/ParticeOnGrid";
+    public const string CS = "Shaders/ParticleDataUploader";
     public const string K_InsertParticle = "InsertParticle";
 
     public static readonly int P_ParticlePositions_Length = Shader.PropertyToID("_ParticlePositions_Length");
