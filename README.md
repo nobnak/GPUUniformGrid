@@ -1,6 +1,6 @@
 # Single-pass Uniform Grid for Unity 
 
-A single-pass method of Uniform Grid construction on GPU based on the article [^1]. This asset is released as a UPM package[^2].
+A single-pass method of Uniform Grid construction on GPU based on the article *Fast Uniform Grid Construction on GPGPUs Using Atomic Operations* [^1]. This asset is released as a UPM package[^2].
 
 ### Close look at active cells
 [![Thumbnail](http://img.youtube.com/vi/NKYRA955oSE/hqdefault.jpg)](https://youtu.be/NKYRA955oSE)
