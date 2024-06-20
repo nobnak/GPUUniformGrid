@@ -12,6 +12,10 @@ void InsertParticle (uint3 id : SV_DispatchThreadID) {
 		return;
 
 	float3 pos = _ParticlePositions[id.x];
-	uint cellID = UniformGrid_GetCellID(pos);
+	float3 cellPosition = UniformGrid_GetCellPosition(pos);
+	if (any(cellPosition < 0) || any(cellPosition >= (int)UniformGrid_cellCount))
+		return;
+
+	uint cellID = MortonCode_Encode3(uint3(cellPosition));
 	UniformGrid_InsertElementIDAtCellID(cellID, id.x);
 }

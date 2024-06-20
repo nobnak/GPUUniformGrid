@@ -48,7 +48,6 @@ Shader "Unlit/CellDensity" {
 			};
 
             struct v2g {
-                float4 vertex : SV_POSITION;
                 uint4 cell : TEXCOORD0;
 			};
             struct g2f {
@@ -77,10 +76,7 @@ Shader "Unlit/CellDensity" {
                     elementCount++;
                 }
 
-                float3 pos = UniformGrid_cellOffset + UniformGrid_cellSize * cellIndex; 
-
                 v2g o;
-                o.vertex = float4(pos, 1);
                 o.cell = uint4(cellIndex, elementCount);
                 return o;
             }
@@ -93,7 +89,7 @@ Shader "Unlit/CellDensity" {
 
                 for (uint i = 0; i < 24; i++) {
                     float3 pos = UniformGrid_cellOffset + UniformGrid_cellSize 
-                        * (cellIndex + box_vertices[box_indices[i]]);
+                        * (cellIndex + 0.5 + 0.95 * (box_vertices[box_indices[i]] - 0.5));
 
 				    g2f o;
 				    o.vertex = mul(UNITY_MATRIX_VP, float4(pos, 1));

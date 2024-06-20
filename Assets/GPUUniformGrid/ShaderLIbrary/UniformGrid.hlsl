@@ -16,8 +16,11 @@ float4 UniformGrid_cellOffset;
 float4 UniformGrid_cellSize;
 uint UniformGrid_cellCount;
 
+float3 UniformGrid_GetCellPosition(float3 position) {
+	return (position - UniformGrid_cellOffset.xyz) / UniformGrid_cellSize.xyz;
+}
 uint UniformGrid_GetCellID(float3 position) {
-	float3 cellPosition = (position - UniformGrid_cellOffset.xyz) / UniformGrid_cellSize.xyz;
+	float3 cellPosition = UniformGrid_GetCellPosition(position);
 	uint3 cellIndex = uint3(cellPosition);
 	uint cellID = MortonCode_Encode3(cellIndex);
 	return cellID;
