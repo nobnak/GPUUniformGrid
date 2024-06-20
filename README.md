@@ -1,4 +1,4 @@
-# Real-time GPU Uniform Grid for Unity 
+# Single-pass Uniform Grid for Unity 
 
 A single-pass method of Uniform Grid construction on GPU based on the article [^1]. This asset is released as a UPM package[^2].
 
