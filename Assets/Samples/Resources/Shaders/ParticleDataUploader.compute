@@ -1,7 +1,7 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel InsertParticle
 
-#include "Assets/GPUUniformGrid/ShaderLIbrary/UniformGrid.hlsl"
+#include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid.hlsl"
 
 uint _ParticlePositions_Length;
 StructuredBuffer<float3> _ParticlePositions;
