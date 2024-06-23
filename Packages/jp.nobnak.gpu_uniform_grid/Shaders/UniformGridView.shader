@@ -5,10 +5,11 @@ Shader "Unlit/UniformGridView" {
         _Scale ("Scale", Float) = 1
     }
     SubShader {
-        Tags { "RenderType"="Opaque" }
+        Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline" = "UniversalPipeline" }
+        Blend SrcAlpha One
         Cull Off
         ZTest LEqual
-        ZWrite On
+        //ZWrite On
 
         Pass {
             CGPROGRAM

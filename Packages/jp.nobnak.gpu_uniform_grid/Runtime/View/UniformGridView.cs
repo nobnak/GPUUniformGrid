@@ -37,6 +37,10 @@ public class UniformGridView : MonoBehaviour {
 
         if ((tuner.visualize & VisualizeFlags.Grid) != 0)
             VisualizeGrid();
+
+        if (grid != null && tuner.setGlobalParams) {
+            grid.SetParamsGlobal();
+        }
     }
     #endregion
 
@@ -102,6 +106,7 @@ public class UniformGridView : MonoBehaviour {
     }
     [System.Serializable]
     public class Tuner {
+        public bool setGlobalParams = true;
         public VisualizeFlags visualize;
         public float3 gridCenter;
         public float gridSize;

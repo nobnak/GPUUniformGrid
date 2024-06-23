@@ -16,6 +16,18 @@ float4 UniformGrid_cellOffset;
 float4 UniformGrid_cellSize;
 uint UniformGrid_cellCount;
 
+bool UniformGrid_IsValid() {
+	#if true
+    return UniformGrid_cellHead_Len > 0 && UniformGrid_cellNext_Len > 0;
+	#else
+    uint UniformGrid_cellHead_r_dim;
+    uint UniformGrid_cellNext_r_dim;
+    UniformGrid_cellHead_r.GetDimensions(UniformGrid_cellHead_r_dim);
+    UniformGrid_cellNext_r.GetDimensions(UniformGrid_cellNext_r_dim);
+    return UniformGrid_cellHead_r_dim > 0 && UniformGrid_cellNext_r_dim > 0;
+    #endif
+}
+
 float3 UniformGrid_GetCellPosition(float3 position) {
 	return (position - UniformGrid_cellOffset.xyz) / UniformGrid_cellSize.xyz;
 }
