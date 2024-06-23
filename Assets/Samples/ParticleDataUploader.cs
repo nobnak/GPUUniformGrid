@@ -10,6 +10,8 @@ using UnityEngine;
 
 public class ParticleDataUploader : MonoBehaviour {
 
+    [SerializeField] protected Tuner tuner = new();
+
     public GPUUniformGrid grid { get; set; }
 
     protected ParticleSystem ps;
@@ -61,13 +63,25 @@ public class ParticleDataUploader : MonoBehaviour {
 
         grid.Reset();
         grid.SetParams(cs, k_InsertParticle);
-        cs.SetInt(P_ParticlePositions_Length, particleCount);
-        cs.SetBuffer(k_InsertParticle, P_ParticlePositions, particlePositionsBuffer);
+        SetParams(cs);
         cs.Dispatch(k_InsertParticle, (particleCount - 1) / (int)gs_InsertParticle + 1, 1, 1);
+
+        if (tuner.setGlobalParams)
+            SetParamsGlobal();
     }
+
     #endregion
 
     #region methods
+    public void SetParams(ComputeShader cs) {
+        cs.SetInt(P_ParticlePositions_Length, ps != null ? ps.particleCount : 0);
+        cs.SetBuffer(k_InsertParticle, P_ParticlePositions, particlePositionsBuffer);
+    }
+    public void SetParamsGlobal() {
+        Shader.SetGlobalInteger(P_ParticlePositions_Length, ps != null ? ps.particleCount : 0);
+        Shader.SetGlobalBuffer(P_ParticlePositions, particlePositionsBuffer);
+    }
+
     private void ClearParticleBuffers() {
         if (particles != default)
             particles.Dispose();
@@ -95,5 +109,10 @@ public class ParticleDataUploader : MonoBehaviour {
 
     public static readonly int P_ParticlePositions_Length = Shader.PropertyToID("_ParticlePositions_Length");
     public static readonly int P_ParticlePositions = Shader.PropertyToID("_ParticlePositions");
+
+    [System.Serializable]
+    public class Tuner {
+        public bool setGlobalParams = true;
+    }
     #endregion
 }

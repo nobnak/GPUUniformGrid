@@ -845,7 +845,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.5
+      scalar: 1
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -5341,6 +5341,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7f399819480dc2146b4e9adbe0351205, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tuner:
+    setGlobalParams: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

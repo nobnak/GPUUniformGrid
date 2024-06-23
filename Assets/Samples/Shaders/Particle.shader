@@ -43,9 +43,9 @@ Shader "Unlit/Particle" {
 
             v2f vert (appdata v) {
                 float3 positionWS = TransformObjectToWorld(v.positionOS.xyz);
-                int count = 0;
+                float4 count = 0;
                 GetParticleDensity(positionWS, _Distance, count);
-                float t = smoothstep(1, 200, count);
+                float t = smoothstep(1, 10, count.w);
                 float4 c = v.color * lerp(_Color, _ColorDense, smoothstep(0.3, 0.7, t));
 
                 v2f o;

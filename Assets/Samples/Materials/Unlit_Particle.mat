@@ -31,6 +31,6 @@ Material:
     m_Floats:
     - _Distance: 0.5
     m_Colors:
-    - _Color: {r: 0.4264151, g: 0.4264151, b: 0.4264151, a: 0.2}
-    - _ColorDense: {r: 1.7098039, g: 0, b: 0.11365255, a: 1}
+    - _Color: {r: 0.5018867, g: 0.5018867, b: 0.5018867, a: 1}
+    - _ColorDense: {r: 3.4196076, g: 0.5347442, b: 0, a: 1}
   m_BuildTextureStacks: []

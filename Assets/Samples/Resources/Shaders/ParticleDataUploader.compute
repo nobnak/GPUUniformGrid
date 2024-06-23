@@ -2,9 +2,7 @@
 #pragma kernel InsertParticle
 
 #include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid.hlsl"
-
-uint _ParticlePositions_Length;
-StructuredBuffer<float3> _ParticlePositions;
+#include "Assets/Samples/ShaderLibrary/ParticleData.hlsl"
 
 [numthreads(64,1,1)]
 void InsertParticle (uint3 id : SV_DispatchThreadID) {
