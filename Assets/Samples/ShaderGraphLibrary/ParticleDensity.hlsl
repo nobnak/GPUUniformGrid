@@ -6,10 +6,11 @@
 #include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid.hlsl"
 #include "Assets/Samples/ShaderLibrary/ParticleData.hlsl"
 
-void GetParticleDensity(float3 Position, float Distance, out float4 Count) {
+void GetParticleDensity(float3 Position, float Distance, int limit, out float4 Count) {
     float3 cellPosition = UniformGrid_GetCellPosition(Position);
-    int3 cellIndex0 = int3(clamp(cellPosition - Distance / UniformGrid_cellSize.xyz, 0, UniformGrid_cellCount));
-    int3 cellIndex1 = int3(clamp(cellPosition + Distance / UniformGrid_cellSize.xyz + 1, 0, UniformGrid_cellCount));
+    int3 cellSpan = clamp(int3(Distance / UniformGrid_cellSize.xyz), 0, limit);
+    int3 cellIndex0 = int3(clamp(cellPosition - cellSpan, 0, UniformGrid_cellCount));
+    int3 cellIndex1 = int3(clamp(cellPosition + cellSpan + 1, 0, UniformGrid_cellCount));
     
     Count = 0;
     
@@ -37,7 +38,9 @@ void GetParticleDensity(float3 Position, float Distance, out float4 Count) {
         }
     }
 }
-
+void GetParticleDensity(float3 Position, float Distance, out float4 Count) {
+    GetParticleDensity(Position, Distance, 1, Count);
+}
 
 
 void GetParticleDensity_float(float3 Position, float Distance, out float Count) {

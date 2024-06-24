@@ -27,6 +27,6 @@ Material:
     m_Floats:
     - _Scale: 5
     m_Colors:
-    - _Color: {r: 0, g: 1, b: 0, a: 0.011764706}
-    - _ColorOverflow: {r: 1, g: 0, b: 0, a: 0.47058824}
+    - _Color: {r: 0, g: 1, b: 0, a: 0.023529412}
+    - _ColorOverflow: {r: 1, g: 0, b: 0, a: 0.69803923}
   m_BuildTextureStacks: []
