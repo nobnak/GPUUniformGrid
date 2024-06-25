@@ -43,10 +43,8 @@ void GetParticleDensity(float3 Position, float Distance, out float4 Count) {
 }
 
 
-void GetParticleDensity_float(float3 Position, float Distance, out float Count) {
-    float4 c;
-    GetParticleDensity(Position, Distance, c);
-    Count = c.x;
+void GetParticleDensity_float(float3 Position, float Distance, int Limit, out float4 Count) {
+    GetParticleDensity(Position, Distance, Limit, Count);
 }
 
 #endif
