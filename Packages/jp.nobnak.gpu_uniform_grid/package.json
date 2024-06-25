@@ -5,10 +5,9 @@
   },
   "name": "jp.nobnak.gpu_uniform_grid",
   "displayName": "GPU Uniform Grid",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "samples": [
-    {
-    }
+    {}
   ],
   "dependencies": {
     "com.unity.mathematics": "1.2.6"
