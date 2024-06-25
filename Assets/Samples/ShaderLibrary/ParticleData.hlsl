@@ -4,4 +4,8 @@
 uint _ParticlePositions_Length;
 StructuredBuffer<float3> _ParticlePositions;
 
+float3 GetParticlePosition(uint index) {
+    return _ParticlePositions[index];
+}
+
 #endif

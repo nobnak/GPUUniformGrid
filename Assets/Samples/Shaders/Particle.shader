@@ -4,6 +4,7 @@ Shader "Unlit/Particle" {
         [HDR] _Color ("Color", Color) = (1,1,1,1)
         [HDR] _ColorDense ("Color Dense", Color) = (1,1,1,1)
         _Distance ("Distance", Range(0, 10)) = 1
+        _SearchLimit ("Search Limit", Range(1, 10)) = 1
     }
     SubShader {
         Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline" = "UniversalPipeline" }
@@ -39,12 +40,13 @@ Shader "Unlit/Particle" {
             float4 _Color;
             float4 _ColorDense;
             float _Distance;
+            int _SearchLimit;
             CBUFFER_END
 
             v2f vert (appdata v) {
                 float3 positionWS = TransformObjectToWorld(v.positionOS.xyz);
                 float4 count = 0;
-                GetParticleDensity(positionWS, _Distance, count);
+                GetParticleDensity_float(positionWS, _Distance, _SearchLimit, count);
                 float t = smoothstep(1, 10, count.w);
                 float4 c = v.color * lerp(_Color, _ColorDense, smoothstep(0.3, 0.7, t));
 
