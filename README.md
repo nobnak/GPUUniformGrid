@@ -2,11 +2,17 @@
 
 A single-pass method of Uniform Grid construction on GPU based on the article *Fast Uniform Grid Construction on GPGPUs Using Atomic Operations* [^1]. This asset is released as a UPM package[^2].
 
-### Close look at active cells
-[![Thumbnail](http://img.youtube.com/vi/NKYRA955oSE/hqdefault.jpg)](https://youtu.be/NKYRA955oSE)
+[![Dense grid visualization](http://img.youtube.com/vi/GRpFk6DCQ8U/mqdefault.jpg)](https://youtube.com/shorts/GRpFk6DCQ8U)<br>
+Dense particle highlighting
 
-### Variable grid size
-[![Thumbnail](http://img.youtube.com/vi/8GmqgaxiQ2g/hqdefault.jpg)](https://youtu.be/8GmqgaxiQ2g)
+[![Dense grid visualization](http://img.youtube.com/vi/GsY-AYIolQ8/mqdefault.jpg)](https://youtube.com/shorts/GsY-AYIolQ8)<br>
+Dense grid visualization
+
+[![Thumbnail](http://img.youtube.com/vi/NKYRA955oSE/mqdefault.jpg)](https://youtu.be/NKYRA955oSE)<br>
+Close look at active cells
+
+[![Thumbnail](http://img.youtube.com/vi/8GmqgaxiQ2g/mqdefault.jpg)](https://youtu.be/8GmqgaxiQ2g)<br>
+Variable grid size
 
 ## Installation
 Add scoped repository:
