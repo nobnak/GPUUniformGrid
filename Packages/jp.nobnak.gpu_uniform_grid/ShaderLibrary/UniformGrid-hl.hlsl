@@ -7,7 +7,10 @@
 #define GET_PARTICLE_POSITION(i) 0;
 #endif
 
-void GetParticleDensity(float3 Position, float Distance, int limit, out float4 Count) {
+void GetParticleDensityAtPosition(float3 Position, float Distance, int limit, out float4 Count) {
+    if (UniformGrid_cellHead_Len <= 0 || UniformGrid_cellNext_Len <= 0)
+        return;
+    
     float3 cellPosition = UniformGrid_GetCellPosition(Position);
     int3 cellSpan = clamp(int3(Distance / UniformGrid_cellSize.xyz), 0, limit);
     int3 cellIndex0 = int3(clamp(cellPosition - cellSpan, 0, UniformGrid_cellCount));
@@ -38,6 +41,14 @@ void GetParticleDensity(float3 Position, float Distance, int limit, out float4 C
             }
         }
     }
+}
+void InsertElementIdAtPosition(float3 position, uint elementId) {
+    float3 cellPosition = UniformGrid_GetCellPosition(position);
+    if (any(cellPosition < 0) || any(cellPosition >= (int) UniformGrid_cellCount))
+        return;
+
+    uint cellID = MortonCode_Encode3(uint3(cellPosition));
+    UniformGrid_InsertElementIDAtCellID(cellID, elementId);
 }
 
 #endif

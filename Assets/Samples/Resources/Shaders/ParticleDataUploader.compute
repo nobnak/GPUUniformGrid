@@ -1,7 +1,7 @@
 // Each #kernel tells which function to compile; you can have many kernels
 #pragma kernel InsertParticle
 
-#include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid.hlsl"
+#include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl"
 #include "Assets/Samples/ShaderLibrary/ParticleData.hlsl"
 
 [numthreads(64,1,1)]
@@ -10,10 +10,5 @@ void InsertParticle (uint3 id : SV_DispatchThreadID) {
 		return;
 
 	float3 pos = _ParticlePositions[id.x];
-	float3 cellPosition = UniformGrid_GetCellPosition(pos);
-	if (any(cellPosition < 0) || any(cellPosition >= (int)UniformGrid_cellCount))
-		return;
-
-	uint cellID = MortonCode_Encode3(uint3(cellPosition));
-	UniformGrid_InsertElementIDAtCellID(cellID, id.x);
+    InsertElementIdAtPosition(pos, id.x);
 }

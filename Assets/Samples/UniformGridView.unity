@@ -475,13 +475,13 @@ MonoBehaviour:
     cellDensity: {fileID: 2100000, guid: ed1ce20de4de8644dbfc92ff7f87d69d, type: 2}
   tuner:
     setGlobalParams: 1
-    visualize: 1
+    visualize: -1
     gridCenter:
       x: 0
       y: 0
       z: 0
     gridSize: 20
-    bitsPerAxis: 4
+    bitsPerAxis: 5
     elementCapacity: 1024
 --- !u!4 &918468517
 Transform:
@@ -538,7 +538,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0ea7c14d6b5c3c141a9d1f904ddeca5f, type: 2}
+  - {fileID: 2100000, guid: 9fa31618f89d9df40827513147ace809, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

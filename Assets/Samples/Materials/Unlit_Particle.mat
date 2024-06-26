@@ -29,7 +29,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Distance: 0.5
+    - _Distance: 0.65
+    - _SearchLimit: 1
     m_Colors:
     - _Color: {r: 0.5018867, g: 0.5018867, b: 0.5018867, a: 1}
     - _ColorDense: {r: 3.4196076, g: 0.5347442, b: 0, a: 1}

@@ -8,7 +8,7 @@
 #include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl"
 
 void GetParticleDensity_float(float3 Position, float Distance, int Limit, out float4 Count) {
-    GetParticleDensity(Position, Distance, Limit, Count);
+    GetParticleDensityAtPosition(Position, Distance, Limit, Count);
 }
 
 #endif
