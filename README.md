@@ -1,6 +1,6 @@
 # Single-pass Uniform Grid for Unity 
 
-A single-pass method of Uniform Grid construction on GPU based on the article *Fast Uniform Grid Construction on GPGPUs Using Atomic Operations* [^1]. This asset is released as a UPM package[^2].
+A single-pass method of Uniform Grid construction on GPU based on the article *Fast Uniform Grid Construction on GPGPUs Using Atomic Operations* [^1]. This asset is released as UPM package[^2].
 
 [![Dense grid visualization](http://img.youtube.com/vi/GRpFk6DCQ8U/mqdefault.jpg)](https://youtube.com/shorts/GRpFk6DCQ8U)<br>
 Dense particle highlighting
