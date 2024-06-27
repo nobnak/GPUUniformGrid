@@ -22,5 +22,12 @@ Add scoped repository:
 
 Install "GPU Uniform Grid" on Package Manager.
 
+## Usage
+- Instantiate [GPUUniformGrid.cs](Packages/jp.nobnak.gpu_uniform_grid/Runtime/GPUUniformGrid.cs) with Uniform Grid related parameters.
+- On each update
+  - Call C# method Reset() method on GPUUniformGrid
+  - Insert each element ID into a cell by using shader function [InsertElementIdAtPosition()](https://github.com/nobnak/GPUUniformGrid/blob/8f654265b23329522e13f138438bcf27ac579c98/Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl#L45)
+- Uniform grid data structure, that encapsulates all element IDs, was obtained
+
 [^1]: Davide Barbieri, Valeria Cardellini, and Salvatore Filippone. 2013. Fast Uniform Grid Construction on GPGPUs Using Atomic Operations. International Conference on Parallel Computing (2013). https://doi.org/10.3233/978-1-61499-381-0-295
 [^2]: https://openupm.com/packages/jp.nobnak.gpu_uniform_grid/
