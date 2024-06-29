@@ -14,14 +14,18 @@ public class UniformGridView : MonoBehaviour {
 
     protected GPUUniformGrid grid;
 
+    protected bool needRebuild;
+    protected UniformGridParams setterGridParams;
+
     #region unity
     void OnEnable() {
+        needRebuild = true;
     }
     void OnDisable() {
         DisposeGrid();
     }
     void OnValidate() {
-        DisposeGrid();
+        needRebuild = true;
     }
     void OnDrawGizmos() {
         if ((tuner.visualize & VisualizeFlags.Volume) != 0)
@@ -29,9 +33,14 @@ public class UniformGridView : MonoBehaviour {
     }
 
     void Update() {
-        if (grid == null) {
-            var gridParams = GenerateParams();
-            grid = new GPUUniformGrid(gridParams);
+        if (needRebuild) {
+            needRebuild = false;
+            if (grid != null)
+                DisposeGrid();
+
+            var gridParams = tuner.srcMode == SrcMode.Inspector ? tuner.gridTuner : setterGridParams;
+            if (gridParams.IsValid())
+                grid = new GPUUniformGrid(gridParams);
             events.OnGridChanged?.Invoke(grid);
         }
 
@@ -44,6 +53,13 @@ public class UniformGridView : MonoBehaviour {
     }
     #endregion
 
+    #region interface
+    public void SetGridParams(UniformGridParams gridParams) { 
+        setterGridParams = gridParams;
+        needRebuild = true;
+    }
+    #endregion
+
     #region methods
     private void DisposeGrid() {
         if (grid != null) {
@@ -53,31 +69,26 @@ public class UniformGridView : MonoBehaviour {
         }
     }
 
-    private UniformGridParams GenerateParams() {
-        return new UniformGridParams(
-            tuner.gridCenter,
-            tuner.gridSize,
-            tuner.bitsPerAxis,
-            tuner.elementCapacity);
-    }
-
     private void VisualizeGrid() {
-        if (grid != null) {
-            var cellDensityRp = new RenderParams(links.cellDensity);
-            cellDensityRp.worldBounds = new Bounds(float3.zero, new float3(1000));
-            if (cellDensityRp.matProps == null)
-                cellDensityRp.matProps = new();
+        if (grid == null)
+            return;
 
-            var gridParams = grid.gridParams;
-            grid.SetParams(cellDensityRp.matProps);
-            Graphics.RenderPrimitives(cellDensityRp,
-                MeshTopology.Lines,
-                2, (int)gridParams.TotalNumberOfCells);
-        }
+        var cellDensityRp = new RenderParams(links.cellDensity);
+        cellDensityRp.worldBounds = new Bounds(float3.zero, new float3(1000));
+        cellDensityRp.matProps ??= new();
+
+        var gridParams = grid.gridParams;
+        grid.SetParams(cellDensityRp.matProps);
+        Graphics.RenderPrimitives(cellDensityRp,
+            MeshTopology.Lines,
+            2, (int)gridParams.TotalNumberOfCells);
     }
 
     private void VisualizeVolume() {
-        var gridParams = GenerateParams();
+        if (grid == null)
+            return;
+
+        var gridParams = grid.gridParams;
         var gridSize = gridParams.gridSize;
 
         var gridEnd0 = gridParams.GridOffset;
@@ -104,20 +115,49 @@ public class UniformGridView : MonoBehaviour {
         Volume = 1 << 0,
         Grid = 1 << 1,
     }
+    public enum SrcMode {
+        Inspector = 0,
+        Setter
+    }
+    [System.Serializable]
+    public class GridTuner {
+        public float3 gridCenter;
+        public float gridSize = 20f;
+        [Range(0, 10)]
+        public uint bitsPerAxis = 5;
+        public uint elementCapacity = 1024;
+
+        #region methods
+        public GridTuner Apply(UniformGridParams gridParams) {
+            gridCenter = gridParams.GridOffset;
+            gridSize = gridParams.gridSize;
+            bitsPerAxis = gridParams.bitsPerAxis;
+            elementCapacity = gridParams.elementCapacity;
+            return this;
+        }
+        public static implicit operator UniformGridParams(GridTuner tuner) {
+            return new UniformGridParams(
+                tuner.gridCenter,
+                tuner.gridSize,
+                tuner.bitsPerAxis,
+                tuner.elementCapacity);
+        }
+        public static explicit operator GridTuner(UniformGridParams gridParams) {
+            return new GridTuner().Apply(gridParams);
+        }
+        #endregion
+    }
     [System.Serializable]
     public class Tuner {
+        public SrcMode srcMode = SrcMode.Inspector;
         public bool setGlobalParams = true;
         public VisualizeFlags visualize;
-        public float3 gridCenter;
-        public float gridSize;
-        [Range(0, 10)]
-        public uint bitsPerAxis;
-
-        public uint elementCapacity = 1024;
+        public GridTuner gridTuner = new();
     }
 
     #endregion
 
+    #region inspector
 #if UNITY_EDITOR
     [UnityEditor.CustomEditor(typeof(UniformGridView))]
     public class UniformGridViewEditor : UnityEditor.Editor {
@@ -156,4 +196,5 @@ public class UniformGridView : MonoBehaviour {
         #endregion
     }
 #endif
+    #endregion
 }

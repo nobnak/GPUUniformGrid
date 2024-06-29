@@ -476,13 +476,14 @@ MonoBehaviour:
   tuner:
     setGlobalParams: 1
     visualize: -1
-    gridCenter:
-      x: 0
-      y: 0
-      z: 0
-    gridSize: 20
-    bitsPerAxis: 5
-    elementCapacity: 1024
+    gridTuner:
+      gridCenter:
+        x: 0
+        y: 0
+        z: 0
+      gridSize: 20
+      bitsPerAxis: 5
+      elementCapacity: 1024
 --- !u!4 &918468517
 Transform:
   m_ObjectHideFlags: 0
