@@ -17,15 +17,15 @@ float4 UniformGrid_cellSize;
 uint UniformGrid_cellCount;
 
 bool UniformGrid_IsValid() {
-	#if true
     return UniformGrid_cellHead_Len > 0 && UniformGrid_cellNext_Len > 0;
-	#else
-    uint UniformGrid_cellHead_r_dim;
-    uint UniformGrid_cellNext_r_dim;
-    UniformGrid_cellHead_r.GetDimensions(UniformGrid_cellHead_r_dim);
-    UniformGrid_cellNext_r.GetDimensions(UniformGrid_cellNext_r_dim);
-    return UniformGrid_cellHead_r_dim > 0 && UniformGrid_cellNext_r_dim > 0;
-    #endif
+}
+bool UniformGrid_IsCellPositionValid(float3 cellPosition) {
+    return all(cellPosition >= 0) && all(cellPosition < (int) UniformGrid_cellCount);
+}
+void UniformGrid_GetCellRange(float3 cellPosition, float Distance, int limit, out int3 cellIndex0, out int3 cellIndex1) {
+    int3 cellSpan = clamp(int3(Distance / UniformGrid_cellSize.xyz), 0, limit);
+    cellIndex0 = int3(clamp(cellPosition - cellSpan, 0, UniformGrid_cellCount));
+    cellIndex1 = int3(clamp(cellPosition + cellSpan + 1, 0, UniformGrid_cellCount));
 }
 
 float3 UniformGrid_GetCellPosition(float3 position) {

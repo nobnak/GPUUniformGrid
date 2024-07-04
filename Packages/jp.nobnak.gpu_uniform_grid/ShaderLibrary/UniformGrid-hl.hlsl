@@ -8,13 +8,12 @@
 #endif
 
 void GetParticleDensityAtPosition(float3 Position, float Distance, int limit, out float4 Count) {
-    if (UniformGrid_cellHead_Len <= 0 || UniformGrid_cellNext_Len <= 0)
+    if (!UniformGrid_IsValid())
         return;
     
     float3 cellPosition = UniformGrid_GetCellPosition(Position);
-    int3 cellSpan = clamp(int3(Distance / UniformGrid_cellSize.xyz), 0, limit);
-    int3 cellIndex0 = int3(clamp(cellPosition - cellSpan, 0, UniformGrid_cellCount));
-    int3 cellIndex1 = int3(clamp(cellPosition + cellSpan + 1, 0, UniformGrid_cellCount));
+    int3 cellIndex0, cellIndex1;
+    UniformGrid_GetCellRange(cellPosition, Distance, limit, cellIndex0, cellIndex1);
     
     Count = 0;
     
@@ -44,7 +43,7 @@ void GetParticleDensityAtPosition(float3 Position, float Distance, int limit, ou
 }
 void InsertElementIdAtPosition(float3 position, uint elementId) {
     float3 cellPosition = UniformGrid_GetCellPosition(position);
-    if (any(cellPosition < 0) || any(cellPosition >= (int) UniformGrid_cellCount))
+    if (!UniformGrid_IsCellPositionValid(cellPosition))
         return;
 
     uint cellID = MortonCode_Encode3(uint3(cellPosition));
