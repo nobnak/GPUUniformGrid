@@ -22,10 +22,13 @@ bool UniformGrid_IsValid() {
 bool UniformGrid_IsCellPositionValid(float3 cellPosition) {
     return all(cellPosition >= 0) && all(cellPosition < (int) UniformGrid_cellCount);
 }
-void UniformGrid_GetCellRange(float3 cellPosition, float Distance, int limit, out int3 cellIndex0, out int3 cellIndex1) {
-    int3 cellSpan = clamp(int3(Distance / UniformGrid_cellSize.xyz), 0, limit);
+void UniformGrid_GetCellRange(float3 cellPosition, int3 cellSpan, out int3 cellIndex0, out int3 cellIndex1) {
     cellIndex0 = int3(clamp(cellPosition - cellSpan, 0, UniformGrid_cellCount));
     cellIndex1 = int3(clamp(cellPosition + cellSpan + 1, 0, UniformGrid_cellCount));
+}
+void UniformGrid_GetCellRange(float3 cellPosition, float Distance, int limit, out int3 cellIndex0, out int3 cellIndex1) {
+    int3 cellSpan = clamp(int3(Distance / UniformGrid_cellSize.xyz), 0, limit);
+    UniformGrid_GetCellRange(cellPosition, cellSpan, cellIndex0, cellIndex1);
 }
 
 float3 UniformGrid_GetCellPosition(float3 position) {
