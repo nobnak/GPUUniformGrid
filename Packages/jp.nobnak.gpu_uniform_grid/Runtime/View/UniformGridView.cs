@@ -15,6 +15,7 @@ public class UniformGridView : MonoBehaviour {
     protected GPUUniformGrid grid;
 
     protected bool needRebuild;
+    protected RenderParams renderParams;
     protected UniformGridParams setterGridParams;
 
     #region unity
@@ -33,16 +34,7 @@ public class UniformGridView : MonoBehaviour {
     }
 
     void Update() {
-        if (needRebuild) {
-            needRebuild = false;
-            if (grid != null)
-                DisposeGrid();
-
-            var gridParams = tuner.srcMode == SrcMode.Inspector ? tuner.gridTuner : setterGridParams;
-            if (gridParams.IsValid())
-                grid = new GPUUniformGrid(gridParams);
-            events.OnGridChanged?.Invoke(grid);
-        }
+        Validate();
 
         if ((tuner.visualize & VisualizeFlags.Grid) != 0)
             VisualizeGrid();
@@ -61,6 +53,25 @@ public class UniformGridView : MonoBehaviour {
     #endregion
 
     #region methods
+    private void Validate() {
+        if (!needRebuild)
+            return;
+        needRebuild = false;
+
+        if (grid != null)
+            DisposeGrid();
+
+        var gridParams = tuner.srcMode == SrcMode.Inspector ? tuner.gridTuner : setterGridParams;
+        if (gridParams.IsValid())
+            grid = new GPUUniformGrid(gridParams);
+        events.OnGridChanged?.Invoke(grid);
+
+        renderParams = new RenderParams(links.cellDensity);
+        renderParams.worldBounds = new Bounds(float3.zero, new float3(1000));
+        renderParams.matProps ??= new();
+        renderParams.layer = gameObject.layer;
+        
+    }
     private void DisposeGrid() {
         if (grid != null) {
             grid.Dispose();
@@ -70,16 +81,14 @@ public class UniformGridView : MonoBehaviour {
     }
 
     private void VisualizeGrid() {
+        Validate();
+
         if (grid == null)
             return;
 
-        var cellDensityRp = new RenderParams(links.cellDensity);
-        cellDensityRp.worldBounds = new Bounds(float3.zero, new float3(1000));
-        cellDensityRp.matProps ??= new();
-
         var gridParams = grid.gridParams;
-        grid.SetParams(cellDensityRp.matProps);
-        Graphics.RenderPrimitives(cellDensityRp,
+        grid.SetParams(renderParams.matProps);
+        Graphics.RenderPrimitives(renderParams,
             MeshTopology.Lines,
             2, (int)gridParams.TotalNumberOfCells);
     }

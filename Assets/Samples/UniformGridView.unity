@@ -436,7 +436,7 @@ GameObject:
   m_Component:
   - component: {fileID: 918468517}
   - component: {fileID: 918468516}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: UniformGrid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -474,6 +474,7 @@ MonoBehaviour:
   links:
     cellDensity: {fileID: 2100000, guid: ed1ce20de4de8644dbfc92ff7f87d69d, type: 2}
   tuner:
+    srcMode: 0
     setGlobalParams: 1
     visualize: -1
     gridTuner:
