@@ -6,7 +6,7 @@ Shader "Unlit/UniformGridView" {
     }
     SubShader {
         Tags { "RenderType"="Transparent" "Queue"="Transparent" "RenderPipeline" = "UniversalPipeline" }
-        Blend SrcAlpha One
+        Blend SrcAlpha OneMinusSrcAlpha
         Cull Off
         ZTest LEqual
         //ZWrite On
