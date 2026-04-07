@@ -1,7 +1,6 @@
 using Nobnak.GPU.UniformGrid;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Unity.Collections;
@@ -27,6 +26,10 @@ public class ParticleDataUploader : MonoBehaviour {
     void OnEnable() {
         ps = GetComponent<ParticleSystem>();
         cs = Resources.Load<ComputeShader>(CS);
+        if (cs == null) {
+            Debug.LogError($"Compute shader '{CS}' not found.");
+            return;
+        }
         k_InsertParticle = cs.FindKernel(K_InsertParticle);
         cs.GetKernelThreadGroupSizes(k_InsertParticle, out gs_InsertParticle, out _, out _);
     }
@@ -35,10 +38,10 @@ public class ParticleDataUploader : MonoBehaviour {
     }
 
     void Update() {
-        if (ps == null || grid == null) return;
+        if (ps == null || grid == null || cs == null) return;
 
         var gridParams = grid.gridParams;
-        var elemtCapacity = (int)gridParams.elementCapacity;
+        var gridElementCap = (int)gridParams.elementCapacity;
         var particleCount = ps.particleCount;
 
         if (particleCount == 0) {
@@ -46,40 +49,55 @@ public class ParticleDataUploader : MonoBehaviour {
             return;
         }
 
-        if (particles == default || particles.Length != elemtCapacity) {
+        if (particleCount > gridElementCap)
+            Debug.LogWarning(
+                $"Particle count ({particleCount}) exceeds grid elementCapacity ({gridElementCap}). Only the first {gridElementCap} particles are inserted.");
+
+        var activeCount = math.min(particleCount, gridElementCap);
+        if (activeCount <= 0) {
+            grid.Reset();
+            return;
+        }
+
+        var bufCap = NextBufferCapacity(particleCount);
+        if (particles == default || particles.Length < particleCount
+            || !particlePositions.IsCreated || particlePositions.Length < bufCap) {
             ClearParticleBuffers();
             particles = new NativeArray<ParticleSystem.Particle>(particleCount, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-            particlePositions = new NativeArray<float3>(elemtCapacity, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
-            particlePositionsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, elemtCapacity, Marshal.SizeOf<float3>());
+            particlePositions = new NativeArray<float3>(bufCap, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+            particlePositionsBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, bufCap, Marshal.SizeOf<float3>());
         }
-        ps.GetParticles(particles);
-        for (var i = 0; i < particleCount; i++) {
-            particlePositions[i] = particles[i].position;
-        }
-        particlePositionsBuffer.SetData(particlePositions);
 
-        //DumpParticleBuffer(elemtCapacity, particleCount);
-        //Debug.Log($"{grid.gridParams}");
+        ps.GetParticles(particles);
+        for (var i = 0; i < particleCount; i++)
+            particlePositions[i] = particles[i].position;
+        particlePositionsBuffer.SetData(particlePositions);
 
         grid.Reset();
         grid.SetParams(cs, k_InsertParticle);
-        SetParams(cs);
-        cs.Dispatch(k_InsertParticle, (particleCount - 1) / (int)gs_InsertParticle + 1, 1, 1);
+        SetParams(cs, activeCount);
+        cs.Dispatch(k_InsertParticle, (activeCount - 1) / (int)gs_InsertParticle + 1, 1, 1);
 
         if (tuner.setGlobalParams)
-            SetParamsGlobal();
+            SetParamsGlobal(activeCount);
     }
 
     #endregion
 
     #region methods
-    public void SetParams(ComputeShader cs) {
-        cs.SetInt(P_ParticlePositions_Length, ps != null ? ps.particleCount : 0);
+    public void SetParams(ComputeShader cs, int positionsLength) {
+        cs.SetInt(P_ParticlePositions_Length, positionsLength);
         cs.SetBuffer(k_InsertParticle, P_ParticlePositions, particlePositionsBuffer);
     }
-    public void SetParamsGlobal() {
-        Shader.SetGlobalInteger(P_ParticlePositions_Length, ps != null ? ps.particleCount : 0);
+    public void SetParamsGlobal(int positionsLength) {
+        Shader.SetGlobalInteger(P_ParticlePositions_Length, positionsLength);
         Shader.SetGlobalBuffer(P_ParticlePositions, particlePositionsBuffer);
+    }
+
+    static int NextBufferCapacity(int particleCount) {
+        if (particleCount <= 0) return 0;
+        var m = math.max(particleCount, 16);
+        return (m + 15) / 16 * 16;
     }
 
     private void ClearParticleBuffers() {
