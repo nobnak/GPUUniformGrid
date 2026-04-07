@@ -1,10 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
-
 namespace Nobnak.GPU.UniformGrid {
 
     public class GPUUniformGrid : System.IDisposable {
@@ -71,6 +71,22 @@ namespace Nobnak.GPU.UniformGrid {
             Shader.SetGlobalInteger(P_UniformGrid_cellCount, (int)gridParams.NumberOfCellsPerAxis);
         }
 
+        /// <summary>
+        /// <see cref="CPUUniformGrid"/> で構築した連結リストをそのまま GPU バッファへ転送する。
+        /// </summary>
+        public void UploadFrom(CPUUniformGrid cpu) {
+            if (cpu == null)
+                throw new ArgumentNullException(nameof(cpu));
+            if (cellHead == null || cellNext == null)
+                throw new InvalidOperationException("GPU buffers are not allocated.");
+            if (!SameGridParams(gridParams, cpu.gridParams))
+                throw new ArgumentException("UniformGridParams must match between CPU and GPU grid.");
+            if (cellHead.count != cpu.CellHead.Length || cellNext.count != cpu.CellNext.Length)
+                throw new ArgumentException("Buffer lengths must match between CPU and GPU grid.");
+            cellHead.SetData(cpu.CellHead);
+            cellNext.SetData(cpu.CellNext);
+        }
+
         #region IDisposable
         public void Dispose() {
             DisposeCellHeadBuffer();
@@ -107,6 +123,13 @@ namespace Nobnak.GPU.UniformGrid {
             }
             cellNext.Dispose();
             cellNext = null;
+        }
+
+        static bool SameGridParams(UniformGridParams a, UniformGridParams b) {
+            return a.bitsPerAxis == b.bitsPerAxis
+                && a.elementCapacity == b.elementCapacity
+                && math.all(a.gridCenter == b.gridCenter)
+                && math.abs(a.gridSize - b.gridSize) <= 1e-6f;
         }
 
         #endregion
