@@ -46,6 +46,8 @@ public class UniformGridView : MonoBehaviour {
     #endregion
 
     #region interface
+    public GPUUniformGrid ActiveGrid => grid;
+
     public void SetGridParams(UniformGridParams gridParams) { 
         setterGridParams = gridParams;
         needRebuild = true;
@@ -173,10 +175,10 @@ public class UniformGridView : MonoBehaviour {
         public override void OnInspectorGUI() {
             base.OnInspectorGUI();
             var view = target as UniformGridView;
-            var isEnabled = view.grid != null && view.grid != null;
+            var isEnabled = view.ActiveGrid != null;
             GUI.enabled = isEnabled;
             if (GUILayout.Button("Readback")) {
-                view.StartCoroutine(CoReadbackUniformGrid(view.grid));
+                view.StartCoroutine(CoReadbackUniformGrid(view.ActiveGrid));
             }
         }
 
