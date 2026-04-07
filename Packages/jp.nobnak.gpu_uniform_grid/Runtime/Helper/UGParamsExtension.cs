@@ -9,7 +9,8 @@ namespace Nobnak.GPU.UniformGrid {
         public static bool IsValid(this UniformGridParams param) {
             return param.gridSize > 0f
                 && math.all(math.isfinite(param.gridCenter))
-                && param.elementCapacity > 0;
+                && param.elementCapacity > 0
+                && param.bitsPerAxis <= UniformGridParams.MaxSupportedBitsPerAxis;
         }
     }
 }

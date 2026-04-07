@@ -2,6 +2,7 @@
 #define __MORTON_CODE_HLSL__
 
 // https://fgiesen.wordpress.com/2009/12/13/decoding-morton-codes/
+// 各軸 10bit（0..1023）まで。それ以上は uint では表現できず、64bit Morton（uint2）や線形セル索引への変更が必要。
 
 uint MortonCode_Encode3_x(uint x) { 
 	x &= 0x000003ff;                  // x = ---- ---- ---- ---- ---- --98 7654 3210

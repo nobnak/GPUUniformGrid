@@ -7,6 +7,11 @@ using UnityEngine;
 namespace Nobnak.GPU.UniformGrid {
 
     public struct UniformGridParams {
+        /// <summary>
+        /// セル ID は uint の Morton コード（各軸 10bit まで）で保持するため、これを超えると衝突する。
+        /// 11bit 以上を扱うには cell ID を uint2（64bit Morton）等に拡張する必要がある。
+        /// </summary>
+        public const uint MaxSupportedBitsPerAxis = 10;
         public readonly float3 gridCenter;
         public readonly float gridSize;
         public readonly uint bitsPerAxis;
@@ -31,8 +36,9 @@ namespace Nobnak.GPU.UniformGrid {
             if (CellSize < 1e-3f || 1e3f < CellSize) {
                 Debug.LogWarning($"cellSize is too small or too large. cellSize={CellSize}");
             }
-            if (10 < bitsPerAxis) {
-                Debug.LogWarning($"bitsPerAxis is too large. bitsPerAxis={bitsPerAxis}");
+            if (bitsPerAxis > MaxSupportedBitsPerAxis) {
+                Debug.LogWarning(
+                    $"bitsPerAxis exceeds Morton uint limit ({MaxSupportedBitsPerAxis}). bitsPerAxis={bitsPerAxis}");
             }
             if (elementCapacity < 1 || 1e9 < elementCapacity) {
                 Debug.LogWarning($"elementCapacity is too small or too large. elementCapacity={elementCapacity}");
