@@ -8,15 +8,14 @@
 #endif
 
 void GetParticleDensityAtPosition(float3 Position, float Distance, int limit, out float4 Count) {
+    Count = 0;
     if (!UniformGrid_IsValid())
         return;
-    
+
     float3 cellPosition = UniformGrid_GetCellPosition(Position);
     int3 cellIndex0, cellIndex1;
     UniformGrid_GetCellRange(cellPosition, Distance, limit, cellIndex0, cellIndex1);
-    
-    Count = 0;
-    
+
     for (int z = cellIndex0.z; z < cellIndex1.z; z++) {
         for (int y = cellIndex0.y; y < cellIndex1.y; y++) {
             for (int x = cellIndex0.x; x < cellIndex1.x; x++) {

@@ -138,7 +138,7 @@ public class UniformGridView : MonoBehaviour {
 
         #region methods
         public GridTuner Apply(UniformGridParams gridParams) {
-            gridCenter = gridParams.GridOffset;
+            gridCenter = gridParams.gridCenter;
             gridSize = gridParams.gridSize;
             bitsPerAxis = gridParams.bitsPerAxis;
             elementCapacity = gridParams.elementCapacity;

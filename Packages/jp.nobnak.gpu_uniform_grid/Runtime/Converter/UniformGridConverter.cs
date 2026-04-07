@@ -15,17 +15,20 @@ namespace Nobnak.GPU.UniformGrid {
             var reqCellHead = AsyncGPUReadback.RequestIntoNativeArray(ref naCellHead, gpu.cellHead);
             var reqCellNext = AsyncGPUReadback.RequestIntoNativeArray(ref naCellNext, gpu.cellNext);
 
-            while (!reqCellHead.done || !reqCellNext.done) {
+            while (!reqCellHead.done || !reqCellNext.done)
                 await Task.Yield();
 
-                if (reqCellHead.hasError) {
-                    Debug.LogError($"Error in reading cell head buffer");
-                    return null;
-                }
-                if (reqCellNext.hasError) {
-                    Debug.LogError($"Error in reading cell next buffer");
-                    return null;
-                }
+            if (reqCellHead.hasError) {
+                Debug.LogError("Error in reading cell head buffer");
+                naCellHead.Dispose();
+                naCellNext.Dispose();
+                return null;
+            }
+            if (reqCellNext.hasError) {
+                Debug.LogError("Error in reading cell next buffer");
+                naCellHead.Dispose();
+                naCellNext.Dispose();
+                return null;
             }
 
             return new CPUUniformGrid(gpu.gridParams, naCellHead, naCellNext);
