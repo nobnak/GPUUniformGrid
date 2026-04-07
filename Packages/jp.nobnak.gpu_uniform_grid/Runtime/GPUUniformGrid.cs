@@ -109,7 +109,7 @@ namespace Nobnak.GPU.UniformGrid {
             if (total <= 0)
                 return;
             compute.Dispatch(kernelInitializeGrid,
-                (total - 1) / (int)ThreadGroupSize.x + 1, 1, 1);
+                UniformGridGpuDispatch.Groups1D(total), 1, 1);
         }
         protected void DisposeCellHeadBuffer() {
             if (cellHead != null) {

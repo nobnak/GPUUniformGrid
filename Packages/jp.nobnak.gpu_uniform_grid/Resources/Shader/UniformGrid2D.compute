@@ -1,0 +1,16 @@
+#pragma kernel InitializeGrid
+
+#include "../../ShaderLibrary/UniformGrid2D.hlsl"
+
+[numthreads(64,1,1)]
+void InitializeGrid(uint3 id : SV_DispatchThreadID) {
+	uint i = id.x;
+	uint headLen = UniformGrid2D_cellHead_Len;
+	if (i < headLen) {
+		UniformGrid2D_SetHeadElementID(i, UniformGrid2D_InitValue);
+		return;
+	}
+	uint j = i - headLen;
+	if (j < UniformGrid2D_cellNext_Len)
+		UniformGrid2D_SetNextElementID(j, UniformGrid2D_InitValue);
+}

@@ -2,6 +2,7 @@
 #define __UNIFORM_GRID_HLSL__
 
 #include "MortonCode.hlsl"
+#include "UniformGridLinkedList.hlsl"
 
 static const uint UniformGrid_InitValue = (uint)-1;
 
@@ -41,22 +42,20 @@ uint UniformGrid_GetCellID(float3 position) {
 	return cellID;
 }
 void UniformGrid_InsertElementIDAtCellID(uint cellID, uint elementID) {
-	uint lastStartElement;
-	UniformGrid_cellHead_rw.InterlockedExchange(4 * cellID, elementID, lastStartElement);
-	UniformGrid_cellNext_rw.Store(4 * elementID, lastStartElement);
+	UG_LL_INTERLOCKED_INSERT(UniformGrid_cellHead_rw, UniformGrid_cellNext_rw, cellID, elementID);
 }
 
 uint UniformGrid_GetHeadElementID(uint cellID) {
-	return UniformGrid_cellHead_r.Load(4 * cellID);
+	return UG_LL_LOAD_HEAD(UniformGrid_cellHead_r, cellID);
 }
 uint UniformGrid_GetNextElementID(uint elementID) {
-	return UniformGrid_cellNext_r.Load(4 * elementID);
+	return UG_LL_LOAD_NEXT(UniformGrid_cellNext_r, elementID);
 }
 
 void UniformGrid_SetHeadElementID (uint cellID, uint value) {
-	UniformGrid_cellHead_rw.Store(4 * cellID, value);
+	UG_LL_STORE_HEAD(UniformGrid_cellHead_rw, cellID, value);
 }
 void UniformGrid_SetNextElementID (uint elementID, uint value) {
-	UniformGrid_cellNext_rw.Store(4 * elementID, value);
+	UG_LL_STORE_NEXT(UniformGrid_cellNext_rw, elementID, value);
 }
 #endif
