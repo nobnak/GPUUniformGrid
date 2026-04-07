@@ -12,8 +12,7 @@ namespace Nobnak.GPU.UniformGrid {
         public readonly UniformGridParams gridParams;
 
         protected ComputeShader compute;
-        protected int kernelInitializeCells;
-        protected int kernelInitializeElements;
+        protected int kernelInitializeGrid;
 
         public GraphicsBuffer cellHead { get; protected set; }
         public GraphicsBuffer cellNext { get; protected set; }
@@ -22,16 +21,17 @@ namespace Nobnak.GPU.UniformGrid {
             this.gridParams = gridParams;
 
             this.compute = Resources.Load<ComputeShader>(CS_UNIFORM_GRID);
-            this.kernelInitializeCells = compute.FindKernel(K_InitializeCells);
-            this.kernelInitializeElements = compute.FindKernel(K_InitializeElements);
+            if (compute == null)
+                throw new System.InvalidOperationException(
+                    $"Compute shader '{CS_UNIFORM_GRID}' not found. Expected under Resources/Shader/UniformGrid.compute.");
+            this.kernelInitializeGrid = compute.FindKernel(K_InitializeGrid);
 
             this.cellHead = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.TotalNumberOfCells, 4);
             this.cellNext = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.elementCapacity, 4);
             Reset();
         }
         public void Reset() {
-            ResetCellHeadBuffer();
-            ResetCellNextBuffer();
+            DispatchInitializeGrid();
         }
         public void SetParams(ComputeShader compute, int kernel = -1) {
             compute.SetInt(P_UniformGrid_cellHead_Len, cellHead != null ? cellHead.count : 0);
@@ -79,23 +79,21 @@ namespace Nobnak.GPU.UniformGrid {
         #endregion
 
         #region methods
-        protected void ResetCellHeadBuffer() {
+        protected void DispatchInitializeGrid() {
             if (cellHead == null) {
-                Debug.LogWarning("cellHead is null. Please call InitializeGrid first.");
+                Debug.LogWarning("cellHead is null.");
                 return;
             }
-            SetParams(compute, kernelInitializeCells);
-            compute.Dispatch(kernelInitializeCells,
-                (cellHead.count - 1) / (int)ThreadGroupSize.x + 1, 1, 1);
-        }
-        protected void ResetCellNextBuffer() {
             if (cellNext == null) {
-                Debug.LogWarning("cellNext is null. Please call InitializeElements first.");
+                Debug.LogWarning("cellNext is null.");
                 return;
             }
-            SetParams(compute, kernelInitializeElements);
-            compute.Dispatch(kernelInitializeElements,
-                (cellNext.count - 1) / (int)ThreadGroupSize.x + 1, 1, 1);
+            SetParams(compute, kernelInitializeGrid);
+            var total = cellHead.count + cellNext.count;
+            if (total <= 0)
+                return;
+            compute.Dispatch(kernelInitializeGrid,
+                (total - 1) / (int)ThreadGroupSize.x + 1, 1, 1);
         }
         protected void DisposeCellHeadBuffer() {
             if (cellHead != null) {
@@ -114,8 +112,7 @@ namespace Nobnak.GPU.UniformGrid {
         #endregion
 
         #region declarations
-        public const string K_InitializeCells = "InitializeCells";
-        public const string K_InitializeElements = "InitializeElements";
+        public const string K_InitializeGrid = "InitializeGrid";
         private const string CS_UNIFORM_GRID = "Shader/UniformGrid";
 
         public static readonly uint3 ThreadGroupSize = new uint3(64, 1, 1);
