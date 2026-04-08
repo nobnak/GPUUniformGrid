@@ -7,7 +7,16 @@
   "displayName": "GPU Uniform Grid",
   "version": "1.7.1",
   "samples": [
-    {}
+    {
+      "displayName": "Uniform Grid — CPU proximity & views",
+      "description": "3D/2D CPU uniform-grid proximity samples, shared HLSL includes, and UniformGridView scenes (URP-oriented).",
+      "path": "Samples~/UniformGrid"
+    },
+    {
+      "displayName": "Uniform Grid — GPU particles",
+      "description": "Upload particle positions with a compute shader and sample density in shaders (URP-oriented).",
+      "path": "Samples~/Particles"
+    }
   ],
   "dependencies": {
     "com.unity.mathematics": "1.2.6"

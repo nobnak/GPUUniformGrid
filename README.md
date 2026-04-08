@@ -1,90 +1,61 @@
 # GPU Uniform Grid for Unity
 
-**GPU Uniform Grid** is a Unity UPM package (`jp.nobnak.gpu_uniform_grid`) that builds a **uniform spatial grid on the GPU in a single pass**, following the approach in *Fast Uniform Grid Construction on GPGPUs Using Atomic Operations* [^1].
+UPM package **`jp.nobnak.gpu_uniform_grid`**: build a **uniform spatial grid on the GPU in one pass**, following *Fast Uniform Grid Construction on GPGPUs Using Atomic Operations* [^1].
 
-Cells are addressed with **3D Morton codes**. Each cell stores a **linked list** of element IDs: a `cellHead` buffer (first ID per cell) and a `cellNext` buffer (per-element chain). `GPUUniformGrid` dispatches built-in compute kernels to clear buffers; insertion uses atomic operations in your shaders.
+Cells use **3D Morton codes**; each cell holds a **linked list** of element IDs (`cellHead` + `cellNext`). Built-in compute clears buffers; your kernels insert with atomics. A **2D Morton variant** (`UniformGrid2D`, `CPUUniformGrid2D`) is included for planar / 2D workflows.
 
-**What you get**
+**API (short)**
 
-- **`UniformGridParams`** — Grid center, cube side length `gridSize`, `bitsPerAxis` so each axis has `2^bitsPerAxis` cells, and `elementCapacity`. Cell IDs are stored in a **single `uint` Morton code**, so **`bitsPerAxis` must not exceed `UniformGridParams.MaxSupportedBitsPerAxis` (10)** without extending the encoding.
-- **`GPUUniformGrid`** — Owns `cellHead` / `cellNext` `GraphicsBuffer`s, `Reset()`, and `SetParams` for a **ComputeShader kernel**, **MaterialPropertyBlock**, or **global shader** properties.
-- **HLSL** — Low-level helpers in [`UniformGrid.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid.hlsl); higher-level helpers in [`UniformGrid-hl.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl), including [`InsertElementIdAtPosition`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl) and `GetParticleDensityAtPosition` (requires defining `GET_PARTICLE_POSITION`).
-- **`UniformGridConverter.ToCPU`** — Copies the GPU grid to a [`CPUUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/CPUUniformGrid.cs) via `AsyncGPUReadback` for debugging.
-- **`UniformGridView`** — Optional grid / cell-density visualization (`Runtime/View`).
+| Piece | Role |
+|--------|------|
+| `UniformGridParams` | Center, `gridSize`, `bitsPerAxis` (≤ `MaxSupportedBitsPerAxis`), `elementCapacity` |
+| `GPUUniformGrid` | Buffers, `Reset()`, `SetParams` / globals for compute & shaders |
+| HLSL | [`UniformGrid.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid.hlsl), [`UniformGrid2D.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid2D.hlsl), [`UniformGrid-hl.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl) (`InsertElementIdAtPosition`, `GetParticleDensityAtPosition` + `GET_PARTICLE_POSITION`) |
+| `UniformGridConverter.ToCPU` | GPU → [`CPUUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/CPUUniformGrid.cs) (debug) |
+| `UniformGridView` | Optional cell visualization ([`Runtime/View`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/View)) |
 
-**Dependency:** `com.unity.mathematics`. The core package is **not tied to a specific render pipeline** (the sample project may use URP).
-
----
-
-## Demo videos
-
-[![Dense grid visualization](http://img.youtube.com/vi/GRpFk6DCQ8U/mqdefault.jpg)](https://youtube.com/shorts/GRpFk6DCQ8U)  
-Dense particle highlighting
-
-[![Dense grid visualization](http://img.youtube.com/vi/GsY-AYIolQ8/mqdefault.jpg)](https://youtube.com/shorts/GsY-AYIolQ8)  
-Dense grid visualization
-
-[![Thumbnail](http://img.youtube.com/vi/NKYRA955oSE/mqdefault.jpg)](https://youtu.be/NKYRA955oSE)  
-Close look at active cells
-
-[![Thumbnail](http://img.youtube.com/vi/8GmqgaxiQ2g/mqdefault.jpg)](https://youtu.be/8GmqgaxiQ2g)  
-Variable grid size
+**Dependency:** `com.unity.mathematics`. Core package is **render-pipeline agnostic**; this repo’s samples target **URP**.
 
 ---
 
-## Install (OpenUPM)
+## Install
 
-Package registry page: **[jp.nobnak.gpu_uniform_grid](https://openupm.com/packages/jp.nobnak.gpu_uniform_grid/)**
-
-Same pattern as **[Circle Renderer (URP) — OpenUPM readme](https://openupm.com/packages/jp.nobnak.circle/?subPage=readme)**: use **OpenUPM CLI** or a **scoped registry** plus Package Manager.
-
-### OpenUPM CLI
-
-After installing [openupm-cli](https://openupm.com/docs/getting-started-cli.html), from your project root:
+**[OpenUPM — jp.nobnak.gpu_uniform_grid](https://openupm.com/packages/jp.nobnak.gpu_uniform_grid/)**
 
 ```bash
 openupm add jp.nobnak.gpu_uniform_grid
 ```
 
-### Unity Package Manager (scoped registry)
-
-1. Open **Edit → Project Settings → Package Manager**.
-2. Under **Scoped Registries**, add:
-   - **URL:** `https://package.openupm.com`
-   - **Scope(s):** `jp.nobnak`
-3. Open **Window → Package Manager**, switch the registry dropdown to **My Registries** (or your OpenUPM entry).
-4. Find **GPU Uniform Grid** and click **Install**.
-
-Or add to `Packages/manifest.json`:
-
-```json
-{
-  "scopedRegistries": [
-    {
-      "name": "package.openupm.com",
-      "url": "https://package.openupm.com",
-      "scopes": [ "jp.nobnak" ]
-    }
-  ],
-  "dependencies": {
-    "jp.nobnak.gpu_uniform_grid": "1.7.1"
-  }
-}
-```
-
-Pin the version to the current release on [OpenUPM](https://openupm.com/packages/jp.nobnak.gpu_uniform_grid/).
+Or scoped registry `https://package.openupm.com`, scope `jp.nobnak`, then install in Package Manager. Pin version in `manifest.json` to match the release you want.
 
 ---
 
-## Usage (overview)
+## Usage
 
-1. Build **`UniformGridParams`** (e.g. `gridCenter`, `gridSize`, `bitsPerAxis`, `elementCapacity`).
-2. **`new GPUUniformGrid(gridParams)`** — call **`Dispose()`** when done.
-3. Each frame you rebuild the grid: **`Reset()`** clears `cellHead` / `cellNext`.
-4. Before your insert pass: **`grid.SetParams(compute, kernel)`** or **`SetParamsGlobal()`** so shaders see buffers and grid constants.
-5. In HLSL, call **`InsertElementIdAtPosition`** or **`UniformGrid_InsertElementIDAtCellID`** to insert element IDs.
+1. Construct `UniformGridParams` and `new GPUUniformGrid(params)`; `Dispose()` when done.
+2. Each frame: `Reset()`, then run your insert pass after `SetParams(compute, kernel)` or `SetParamsGlobal()`.
+3. In HLSL, call `InsertElementIdAtPosition` or `UniformGrid_InsertElementIDAtCellID`.
 
-**Example (this repository):** **[`Assets/Samples`](Assets/Samples)** — GPU particle grid upload lives under **[`Assets/Samples/Particles`](Assets/Samples/Particles)** ([`ParticleDataUploader.cs`](Assets/Samples/Particles/ParticleDataUploader.cs)). CPU proximity demos are under **[`Assets/Samples/UniformGrid`](Assets/Samples/UniformGrid)** (`Proximity3D`, `Proximity2D`, `Scenes`). (Clone the repo; the UPM package on OpenUPM is the library under `Packages/jp.nobnak.gpu_uniform_grid`.)
+---
+
+## Samples
+
+**In this repository** (authoring copy under `Assets/Samples`):
+
+| Folder | Content |
+|--------|---------|
+| [`Assets/Samples/UniformGrid`](Assets/Samples/UniformGrid) | CPU proximity (3D/2D), shared includes, `Scenes` for grid views |
+| [`Assets/Samples/Particles`](Assets/Samples/Particles) | [`ParticleDataUploader.cs`](Assets/Samples/Particles/ParticleDataUploader.cs), compute upload, particle shading |
+
+**From an installed package:** Package Manager → **GPU Uniform Grid** → **Samples** → import **Uniform Grid — CPU proximity & views** (`Samples~/UniformGrid`) or **Uniform Grid — GPU particles** (`Samples~/Particles`). Unity hides `Samples~` from the Project window; imported files appear under `Assets` as usual.
+
+**Maintainers (this repo):** [`Assets/Editor/PackageSampleEmbed.cs`](Assets/Editor/PackageSampleEmbed.cs) mirrors `Assets/Samples` into [`Packages/jp.nobnak.gpu_uniform_grid/Samples~`](Packages/jp.nobnak.gpu_uniform_grid/Samples~) (same layout as `package.json` sample paths) on compile / project change, or via **Tools → GPU Uniform Grid → Force Copy Samples to Package (Samples~)**. Run a force copy before packing or releasing so tarball/registry consumers see up-to-date samples.
+
+---
+
+## Demo videos
+
+[![Dense particle highlighting](http://img.youtube.com/vi/GRpFk6DCQ8U/mqdefault.jpg)](https://youtube.com/shorts/GRpFk6DCQ8U) · [![Dense grid visualization](http://img.youtube.com/vi/GsY-AYIolQ8/mqdefault.jpg)](https://youtube.com/shorts/GsY-AYIolQ8) · [![Active cells](http://img.youtube.com/vi/NKYRA955oSE/mqdefault.jpg)](https://youtu.be/NKYRA955oSE) · [![Variable grid size](http://img.youtube.com/vi/8GmqgaxiQ2g/mqdefault.jpg)](https://youtu.be/8GmqgaxiQ2g)
 
 ---
 
