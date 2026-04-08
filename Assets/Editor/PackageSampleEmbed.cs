@@ -9,6 +9,8 @@ public static class GPUUniformGridPackageSampleEmbed {
 
     const string SamplesSourcePath = "Assets/Samples";
     const string SamplesDestPath = "Packages/jp.nobnak.gpu_uniform_grid/Samples~";
+    const string ReadmeSourcePath = "README.md";
+    const string ReadmeDestPath = "Packages/jp.nobnak.gpu_uniform_grid/README.md";
 
     static GPUUniformGridPackageSampleEmbed() {
         CompilationPipeline.compilationStarted += OnCompilationStarted;
@@ -22,28 +24,40 @@ public static class GPUUniformGridPackageSampleEmbed {
     static void OnEditorDelayCall() => CopySamplesToPackage();
     static void OnProjectChanged() => CopySamplesToPackage();
 
-    [MenuItem("Tools/GPU Uniform Grid/Force Copy Samples to Package (Samples~)")]
+    [MenuItem("Tools/GPU Uniform Grid/Force Copy Samples & README to Package")]
     static void ForceCopySamples() => CopySamplesToPackage();
 
     static void CopySamplesToPackage() {
         if (s_Copying)
             return;
-        if (!Directory.Exists(SamplesSourcePath)) {
-            Debug.LogWarning($"[GPUUniformGridPackageSampleEmbed] Samples folder not found: {SamplesSourcePath}");
-            return;
-        }
         s_Copying = true;
         try {
-            if (Directory.Exists(SamplesDestPath))
-                Directory.Delete(SamplesDestPath, true);
-            Directory.CreateDirectory(SamplesDestPath);
-            CopyDirectory(SamplesSourcePath, SamplesDestPath);
+            if (Directory.Exists(SamplesSourcePath)) {
+                if (Directory.Exists(SamplesDestPath))
+                    Directory.Delete(SamplesDestPath, true);
+                Directory.CreateDirectory(SamplesDestPath);
+                CopyDirectory(SamplesSourcePath, SamplesDestPath);
+            } else {
+                Debug.LogWarning($"[GPUUniformGridPackageSampleEmbed] Samples folder not found: {SamplesSourcePath}");
+            }
+            CopyReadmeToPackage();
             AssetDatabase.Refresh();
         } catch (System.Exception e) {
             Debug.LogError($"[GPUUniformGridPackageSampleEmbed] Copy failed: {e.Message}");
         } finally {
             s_Copying = false;
         }
+    }
+
+    static void CopyReadmeToPackage() {
+        if (!File.Exists(ReadmeSourcePath)) {
+            Debug.LogWarning($"[GPUUniformGridPackageSampleEmbed] README not found: {ReadmeSourcePath}");
+            return;
+        }
+        string destDir = Path.GetDirectoryName(ReadmeDestPath);
+        if (!string.IsNullOrEmpty(destDir))
+            Directory.CreateDirectory(destDir);
+        File.Copy(ReadmeSourcePath, ReadmeDestPath, true);
     }
 
     static void CopyDirectory(string sourcePath, string destPath) {
