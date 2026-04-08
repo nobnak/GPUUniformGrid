@@ -3,7 +3,7 @@
 
 //#pragma target 5.0
 
-#include "Assets/Samples/ShaderLibrary/ParticleData.hlsl"
+#include "Assets/Samples/Particles/ShaderLibrary/ParticleData.hlsl"
 #define GET_PARTICLE_POSITION(i) GetParticlePosition(i)
 #include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl"
 

@@ -18,7 +18,7 @@ Shader "Unlit/Particle" {
             #pragma fragment frag
             
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Assets/Samples/ShaderGraphLibrary/ParticleDensity.hlsl"
+            #include "Assets/Samples/Particles/ShaderGraphLibrary/ParticleDensity.hlsl"
 
             struct appdata {
                 float4 positionOS : POSITION;
