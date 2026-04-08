@@ -24,7 +24,7 @@ UPM package **`jp.nobnak.gpu_uniform_grid`**: a **GPU uniform spatial grid** bui
 openupm add jp.nobnak.gpu_uniform_grid
 ```
 
-Or add the OpenUPM scoped registry (`https://package.openupm.com`, scope `jp.nobnak`) and install from Package Manager. Pin the version in `manifest.json` (e.g. `"jp.nobnak.gpu_uniform_grid": "1.8.1"`) to match the release you use.
+Or add the OpenUPM scoped registry (`https://package.openupm.com`, scope `jp.nobnak`) and install from Package Manager. Pin the version in `manifest.json` (e.g. `"jp.nobnak.gpu_uniform_grid": "1.8.2"`) to match the release you use.
 
 ---
 
