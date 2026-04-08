@@ -55,4 +55,18 @@ void UniformGrid2D_SetNextElementID(uint elementID, uint value) {
 	UG_LL_STORE_NEXT(UniformGrid2D_cellNext_rw, elementID, value);
 }
 
+void UniformGrid2D_GetCellRange(float2 cellPosition, int2 cellSpan, out int2 cellIndex0, out int2 cellIndex1) {
+	cellIndex0 = int2(clamp(cellPosition - cellSpan, 0, UniformGrid2D_cellCount));
+	cellIndex1 = int2(clamp(cellPosition + cellSpan + 1, 0, UniformGrid2D_cellCount));
+}
+
+// 距離 R の円盤を覆う AABB セル範囲（各軸 ceil(R / cellSize)）
+void UniformGrid2D_GetCellRangeForRadius(float2 cellPosition, float radiusWorld, out int2 cellIndex0, out int2 cellIndex1) {
+	float2 cs = UniformGrid2D_cellSize.xy;
+	int2 span = (int2)ceil(radiusWorld / cs);
+	uint n = UniformGrid2D_cellCount;
+	span = min(span, int2((int)n, (int)n));
+	UniformGrid2D_GetCellRange(cellPosition, span, cellIndex0, cellIndex1);
+}
+
 #endif

@@ -65,6 +65,20 @@ namespace Nobnak.GPU.UniformGrid {
             return TryGetCellId(planePosition, out var cellId) && TryInsertElementAtCellId(cellId, elementId);
         }
 
+        public void InsertFromPositions(NativeArray<float2> positions, int count) {
+            if (count > positions.Length)
+                throw new ArgumentOutOfRangeException(nameof(count));
+            for (var i = 0; i < count; i++) {
+                if (!TryInsertElementAtPosition(positions[i], (uint)i))
+                    Debug.LogWarning($"CPUUniformGrid2D: skipped insert for element {i} (out of grid or invalid).");
+            }
+        }
+
+        public void RebuildFromPositions(NativeArray<float2> positions, int count) {
+            Clear();
+            InsertFromPositions(positions, count);
+        }
+
         public void UploadTo(GPUUniformGrid2D gpu) {
             if (gpu == null)
                 throw new ArgumentNullException(nameof(gpu));
