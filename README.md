@@ -84,7 +84,7 @@ Pin the version to the current release on [OpenUPM](https://openupm.com/packages
 4. Before your insert pass: **`grid.SetParams(compute, kernel)`** or **`SetParamsGlobal()`** so shaders see buffers and grid constants.
 5. In HLSL, call **`InsertElementIdAtPosition`** or **`UniformGrid_InsertElementIDAtCellID`** to insert element IDs.
 
-**Example (this repository):** **[`Assets/Samples`](Assets/Samples)** — [`ParticleDataUploader.cs`](Assets/Samples/ParticleDataUploader.cs) uploads particle positions and dispatches a compute kernel that inserts into the grid. (Clone the repo; the UPM package on OpenUPM is the library under `Packages/jp.nobnak.gpu_uniform_grid`.)
+**Example (this repository):** **[`Assets/Samples`](Assets/Samples)** — [`ParticleDataUploader.cs`](Assets/Samples/ParticleDataUploader.cs) dispatches a compute kernel that inserts into the grid. CPU-upload proximity demos live under **[`Assets/Samples/UniformGrid`](Assets/Samples/UniformGrid)** (`Proximity3D`, `Proximity2D`, `Scenes`). (Clone the repo; the UPM package on OpenUPM is the library under `Packages/jp.nobnak.gpu_uniform_grid`.)
 
 ---
 

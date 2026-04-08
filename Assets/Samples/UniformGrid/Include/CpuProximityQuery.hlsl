@@ -1,7 +1,7 @@
 #ifndef __CPU_PROXIMITY_QUERY_HLSL__
 #define __CPU_PROXIMITY_QUERY_HLSL__
 
-#include "Assets/Samples/ShaderLibrary/CpuProximityData.hlsl"
+#include "Assets/Samples/UniformGrid/Include/CpuProximityData.hlsl"
 #define GET_PARTICLE_POSITION(i) CpuPointPosition(i)
 #include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl"
 
