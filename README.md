@@ -1,20 +1,18 @@
 # GPU Uniform Grid for Unity
 
-UPM package **`jp.nobnak.gpu_uniform_grid`**: build a **uniform spatial grid on the GPU in one pass**, following *Fast Uniform Grid Construction on GPGPUs Using Atomic Operations* [^1].
+UPM package **`jp.nobnak.gpu_uniform_grid`**: a **GPU uniform spatial grid** built in a single pass, following Barbieri et al. [^1]. Each cell stores a **linked list** of element IDs (`cellHead`, `cellNext`). Package **compute shaders** clear buffers; **your** kernels insert with atomics.
 
-Cells use **3D Morton codes**; each cell holds a **linked list** of element IDs (`cellHead` + `cellNext`). Built-in compute clears buffers; your kernels insert with atomics. A **2D Morton variant** (`UniformGrid2D`, `CPUUniformGrid2D`) is included for planar / 2D workflows.
+**Encoding:** **3D** cells use a **Morton `uint`** per cell (`UniformGridParams`, **`bitsPerAxis` ≤ 10**). **2D** uses a separate encoding with **`UniformGridParams2D`** (**≤ 16 bits per axis**). Pick **`GPUUniformGrid`** / **`GPUUniformGrid2D`** and matching HLSL (`UniformGrid*.hlsl`, [`UniformGridLinkedList.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGridLinkedList.hlsl)).
 
-**API (short)**
+| Area | Main types / assets |
+|------|---------------------|
+| 3D grid | [`UniformGridParams`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Data/UniformGridParams.cs), [`GPUUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/GPUUniformGrid.cs), [`CPUUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/CPUUniformGrid.cs), [`UniformGrid.compute`](Packages/jp.nobnak.gpu_uniform_grid/Resources/Shader/UniformGrid.compute) |
+| 2D grid | [`UniformGridParams2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Data/UniformGridParams2D.cs), [`GPUUniformGrid2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/GPUUniformGrid2D.cs), [`CPUUniformGrid2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/CPUUniformGrid2D.cs), [`UniformGrid2D.compute`](Packages/jp.nobnak.gpu_uniform_grid/Resources/Shader/UniformGrid2D.compute) |
+| HLSL helpers | [`UniformGrid-hl.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl), [`UniformGrid2D-hl.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid2D-hl.hlsl) — e.g. `InsertElementIdAtPosition`, `GetParticleDensityAtPosition` (define **`GET_PARTICLE_POSITION`**) |
+| CPU readback | [`UniformGridConverter.ToCPU`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Converter/UniformGridConverter.cs) → `CPUUniformGrid` / `CPUUniformGrid2D` |
+| Debug draw | [`UniformGridView`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/View/UniformGridView.cs), [`UniformGridView2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/View/UniformGridView2D.cs) + package shaders |
 
-| Piece | Role |
-|--------|------|
-| `UniformGridParams` | Center, `gridSize`, `bitsPerAxis` (≤ `MaxSupportedBitsPerAxis`), `elementCapacity` |
-| `GPUUniformGrid` | Buffers, `Reset()`, `SetParams` / globals for compute & shaders |
-| HLSL | [`UniformGrid.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid.hlsl), [`UniformGrid2D.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid2D.hlsl), [`UniformGrid-hl.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl) (`InsertElementIdAtPosition`, `GetParticleDensityAtPosition` + `GET_PARTICLE_POSITION`) |
-| `UniformGridConverter.ToCPU` | GPU → [`CPUUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/CPUUniformGrid.cs) (debug) |
-| `UniformGridView` | Optional cell visualization ([`Runtime/View`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/View)) |
-
-**Dependency:** `com.unity.mathematics`. Core package is **render-pipeline agnostic**; this repo’s samples target **URP**.
+**Dependency:** `com.unity.mathematics`. The library does not depend on a specific render pipeline; **samples in this repo use URP**.
 
 ---
 
@@ -26,30 +24,28 @@ Cells use **3D Morton codes**; each cell holds a **linked list** of element IDs 
 openupm add jp.nobnak.gpu_uniform_grid
 ```
 
-Or scoped registry `https://package.openupm.com`, scope `jp.nobnak`, then install in Package Manager. Pin version in `manifest.json` to match the release you want.
+Or add the OpenUPM scoped registry (`https://package.openupm.com`, scope `jp.nobnak`) and install from Package Manager. Pin the version in `manifest.json` (e.g. `"jp.nobnak.gpu_uniform_grid": "1.7.1"`) to match the release you use.
 
 ---
 
-## Usage
+## Usage (outline)
 
-1. Construct `UniformGridParams` and `new GPUUniformGrid(params)`; `Dispose()` when done.
-2. Each frame: `Reset()`, then run your insert pass after `SetParams(compute, kernel)` or `SetParamsGlobal()`.
-3. In HLSL, call `InsertElementIdAtPosition` or `UniformGrid_InsertElementIDAtCellID`.
+**3D:** `new GPUUniformGrid(params)` → each frame `Reset()` → `SetParams(compute, kernel)` (or globals) on your insert pass → in HLSL use helpers from `UniformGrid-hl.hlsl` / low-level APIs in `UniformGrid.hlsl`. **`Dispose()`** when done.
+
+**2D:** Same flow with `GPUUniformGrid2D` / `UniformGrid2D-hl.hlsl` / `UniformGrid2D.hlsl`.
 
 ---
 
 ## Samples
 
-**In this repository** (authoring copy under `Assets/Samples`):
+| Location | What |
+|----------|------|
+| [`Assets/Samples/UniformGrid`](Assets/Samples/UniformGrid) | CPU proximity queries (**`Proximity3D`**, **`Proximity2D`**), shared includes under **`Include/`** |
+| [`Assets/Samples/Particles`](Assets/Samples/Particles) | GPU particle upload ([`ParticleDataUploader.cs`](Assets/Samples/Particles/ParticleDataUploader.cs)), particle / density shaders, and **`UniformGridView.unity`** (grid visualization scene) |
 
-| Folder | Content |
-|--------|---------|
-| [`Assets/Samples/UniformGrid`](Assets/Samples/UniformGrid) | CPU proximity (3D/2D), shared includes, `Scenes` for grid views |
-| [`Assets/Samples/Particles`](Assets/Samples/Particles) | [`ParticleDataUploader.cs`](Assets/Samples/Particles/ParticleDataUploader.cs), compute upload, particle shading |
+**Consumers of the package only:** Package Manager → **GPU Uniform Grid** → **Samples** → import **`Samples~/UniformGrid`** or **`Samples~/Particles`** (Unity hides **`Samples~`** in the Project window).
 
-**From an installed package:** Package Manager → **GPU Uniform Grid** → **Samples** → import **Uniform Grid — CPU proximity & views** (`Samples~/UniformGrid`) or **Uniform Grid — GPU particles** (`Samples~/Particles`). Unity hides `Samples~` from the Project window; imported files appear under `Assets` as usual.
-
-**Maintainers (this repo):** [`Assets/Editor/PackageSampleEmbed.cs`](Assets/Editor/PackageSampleEmbed.cs) mirrors `Assets/Samples` into [`Packages/jp.nobnak.gpu_uniform_grid/Samples~`](Packages/jp.nobnak.gpu_uniform_grid/Samples~) (same layout as `package.json` sample paths) on compile / project change, or via **Tools → GPU Uniform Grid → Force Copy Samples to Package (Samples~)**. Run a force copy before packing or releasing so tarball/registry consumers see up-to-date samples.
+**This repository:** [`Assets/Editor/PackageSampleEmbed.cs`](Assets/Editor/PackageSampleEmbed.cs) copies **`Assets/Samples`** → [`Packages/jp.nobnak.gpu_uniform_grid/Samples~`](Packages/jp.nobnak.gpu_uniform_grid/Samples~) (aligned with [`package.json`](Packages/jp.nobnak.gpu_uniform_grid/package.json) sample entries) on relevant editor events, or via **Tools → GPU Uniform Grid → Force Copy Samples to Package (Samples~)**. Refresh before release packaging if samples changed.
 
 ---
 
