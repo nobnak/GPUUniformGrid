@@ -1,31 +1,35 @@
 using System.Collections;
-using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 using Nobnak.GPU.UniformGrid;
-using Unity.Collections;
-using System.Text;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
-public class UniformGridView : MonoBehaviour {
+public class UniformGridView : MonoBehaviour, IGPUUniformGridProvider {
 
     [SerializeField] protected Events events = new();
     [SerializeField] protected Links links = new();
     [SerializeField] protected Tuner tuner = new();
+    /// <summary><see cref="SrcMode.Provider"/> かつ <see cref="gridProvider"/> が null のとき <see cref="runtimeProvider"/> を参照する。</summary>
+    [SerializeField] protected MonoBehaviour gridProvider;
 
-    protected GPUUniformGrid grid;
+    protected GPUUniformGrid ownedGrid;
 
     protected bool needRebuild;
     protected RenderParams renderParams;
-    protected UniformGridParams setterGridParams;
+    IGPUUniformGridProvider runtimeProvider;
 
     #region unity
     void OnEnable() {
+        NormalizeSrcMode();
         needRebuild = true;
     }
     void OnDisable() {
-        DisposeGrid();
+        DisposeOwnedGrid();
     }
     void OnValidate() {
+        NormalizeSrcMode();
         needRebuild = true;
     }
     void OnDrawGizmos() {
@@ -39,34 +43,94 @@ public class UniformGridView : MonoBehaviour {
         if ((tuner.visualize & VisualizeFlags.Grid) != 0)
             VisualizeGrid();
 
-        if (grid != null && tuner.setGlobalParams) {
-            grid.SetParamsGlobal();
-        }
+        var g = ActiveGrid;
+        if (g != null && tuner.setGlobalParams)
+            g.SetParamsGlobal();
     }
     #endregion
 
     #region interface
-    public GPUUniformGrid ActiveGrid => grid;
+    public GPUUniformGrid Grid => ActiveGrid;
 
-    public void SetGridParams(UniformGridParams gridParams) { 
-        setterGridParams = gridParams;
+    public GPUUniformGrid ActiveGrid => tuner.srcMode == SrcMode.Provider
+        ? ResolveProviderGrid()
+        : ownedGrid;
+
+    /// <summary>Inspector モード時のみ <see cref="Tuner.gridTuner"/> を更新して再構築する。Provider モードでは無視。</summary>
+    public void SetGridParams(UniformGridParams gridParams) {
+        if (tuner.srcMode == SrcMode.Provider)
+            return;
+        tuner.gridTuner.Apply(gridParams);
+        needRebuild = true;
+    }
+
+    public void SetRuntimeProvider(IGPUUniformGridProvider provider) {
+        runtimeProvider = provider;
+        needRebuild = true;
+    }
+
+    public void ClearRuntimeProvider() {
+        runtimeProvider = null;
         needRebuild = true;
     }
     #endregion
 
     #region methods
-    private void Validate() {
+    void NormalizeSrcMode() {
+        var v = (int)tuner.srcMode;
+        if (v == (int)SrcMode.Inspector || v == (int)SrcMode.Provider)
+            return;
+        if (v == (int)LegacySrcModeValue.Setter) {
+            tuner.srcMode = SrcMode.Inspector;
+            Debug.LogWarning(
+                $"[UniformGridView] '{name}': SrcMode Setter is removed; normalized to Inspector. Use SetGridParams while in Inspector mode.",
+                this);
+            return;
+        }
+        tuner.srcMode = SrcMode.Inspector;
+        Debug.LogWarning(
+            $"[UniformGridView] '{name}': Invalid SrcMode value {v}; normalized to Inspector.",
+            this);
+    }
+
+    IGPUUniformGridProvider ResolveProviderForEvent() {
+        if (tuner.srcMode == SrcMode.Provider)
+            return (gridProvider as IGPUUniformGridProvider) ?? runtimeProvider;
+        return this;
+    }
+
+    GPUUniformGrid ResolveProviderGrid() {
+        if (gridProvider != null) {
+            var p = gridProvider as IGPUUniformGridProvider;
+            if (p == null) {
+                Debug.LogWarning(
+                    $"[UniformGridView] '{name}': gridProvider ({gridProvider.GetType().Name}) does not implement {nameof(IGPUUniformGridProvider)}.",
+                    this);
+                return null;
+            }
+            return p.Grid;
+        }
+        return runtimeProvider?.Grid;
+    }
+
+    void Validate() {
+        NormalizeSrcMode();
         if (!needRebuild)
             return;
         needRebuild = false;
 
-        if (grid != null)
-            DisposeGrid();
+        if (tuner.srcMode == SrcMode.Inspector) {
+            if (ownedGrid != null)
+                DisposeOwnedGrid();
 
-        var gridParams = tuner.srcMode == SrcMode.Inspector ? tuner.gridTuner : setterGridParams;
-        if (gridParams.IsValid())
-            grid = new GPUUniformGrid(gridParams);
-        events.OnGridChanged?.Invoke(grid);
+            var gridParams = (UniformGridParams)tuner.gridTuner;
+            if (gridParams.IsValid())
+                ownedGrid = new GPUUniformGrid(gridParams);
+        } else {
+            if (ownedGrid != null)
+                DisposeOwnedGrid();
+        }
+        events.OnGridChanged?.Invoke(ResolveProviderForEvent());
 
         renderParams = new RenderParams(links.cellDensity);
         renderParams.worldBounds = new Bounds(float3.zero, new float3(1000));
@@ -74,47 +138,37 @@ public class UniformGridView : MonoBehaviour {
         renderParams.layer = gameObject.layer;
         
     }
-    private void DisposeGrid() {
-        if (grid != null) {
-            grid.Dispose();
-            grid = null;
-            events.OnGridChanged?.Invoke(null);
+    void DisposeOwnedGrid() {
+        if (ownedGrid != null) {
+            ownedGrid.Dispose();
+            ownedGrid = null;
         }
     }
 
-    private void VisualizeGrid() {
+    void VisualizeGrid() {
         Validate();
 
-        if (grid == null)
+        var g = ActiveGrid;
+        if (g == null)
             return;
 
-        var gridParams = grid.gridParams;
-        grid.SetParams(renderParams.matProps);
-        Graphics.RenderPrimitives(renderParams,
-            MeshTopology.Lines,
-            2, (int)gridParams.TotalNumberOfCells);
+        UniformGridDebugDrawer.DrawGrid(g, ref renderParams);
     }
 
-    private void VisualizeVolume() {
-        if (grid == null)
-            return;
-
-        var gridParams = grid.gridParams;
-        var gridSize = gridParams.gridSize;
-
-        var gridEnd0 = gridParams.GridOffset;
-        var gridEnd1 = gridParams.GridOffset + gridSize;
-        var gridCenter = (gridEnd0 + gridEnd1) * 0.5f;
-
-        Gizmos.color = Color.grey;
-        Gizmos.DrawWireCube(gridCenter, new float3(gridSize));
+    void VisualizeVolume() {
+        UniformGridDebugDrawer.DrawVolumeGizmos(ActiveGrid);
     }
     #endregion
 
     #region declarations
+    /// <summary>旧 <see cref="SrcMode"/> の Setter は削除済み。シリアライズ互換用の数値。</summary>
+    enum LegacySrcModeValue {
+        Setter = 1,
+    }
+
     [System.Serializable]
     public class Events {
-        public UnityEngine.Events.UnityEvent<GPUUniformGrid> OnGridChanged;
+        public UnityEngine.Events.UnityEvent<IGPUUniformGridProvider> OnGridChanged;
     }
     [System.Serializable]
     public class Links {
@@ -126,9 +180,12 @@ public class UniformGridView : MonoBehaviour {
         Volume = 1 << 0,
         Grid = 1 << 1,
     }
+    /// <summary>
+    /// <see cref="Provider"/> は旧シーン互換のため 2（以前の enum と同じ値）。
+    /// </summary>
     public enum SrcMode {
         Inspector = 0,
-        Setter
+        Provider = 2,
     }
     [System.Serializable]
     public class GridTuner {
@@ -173,13 +230,31 @@ public class UniformGridView : MonoBehaviour {
     [UnityEditor.CustomEditor(typeof(UniformGridView))]
     public class UniformGridViewEditor : UnityEditor.Editor {
         public override void OnInspectorGUI() {
-            base.OnInspectorGUI();
-            var view = target as UniformGridView;
-            var isEnabled = view.ActiveGrid != null;
-            GUI.enabled = isEnabled;
+            serializedObject.Update();
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("events"));
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("links"));
+            var tunerProp = serializedObject.FindProperty("tuner");
+            EditorGUILayout.PropertyField(tunerProp.FindPropertyRelative("srcMode"));
+            EditorGUILayout.PropertyField(tunerProp.FindPropertyRelative("setGlobalParams"));
+            EditorGUILayout.PropertyField(tunerProp.FindPropertyRelative("visualize"));
+            var modeInt = tunerProp.FindPropertyRelative("srcMode").intValue;
+            if (modeInt == (int)SrcMode.Inspector)
+                EditorGUILayout.PropertyField(tunerProp.FindPropertyRelative("gridTuner"));
+            else if (modeInt == (int)SrcMode.Provider) {
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("gridProvider"));
+                EditorGUILayout.HelpBox(
+                    "runtimeProvider はコードから SetRuntimeProvider / ClearRuntimeProvider で設定します。gridProvider が非 null のときはそちらを優先します。",
+                    UnityEditor.MessageType.Info);
+            } else
+                EditorGUILayout.HelpBox("無効な SrcMode です。保存時・実行時に Inspector に正規化されます。", UnityEditor.MessageType.Warning);
+            serializedObject.ApplyModifiedProperties();
+
+            var view = (UniformGridView)target;
+            EditorGUI.BeginDisabledGroup(view.ActiveGrid == null);
             if (GUILayout.Button("Readback")) {
                 view.StartCoroutine(CoReadbackUniformGrid(view.ActiveGrid));
             }
+            EditorGUI.EndDisabledGroup();
         }
 
         #region routine
