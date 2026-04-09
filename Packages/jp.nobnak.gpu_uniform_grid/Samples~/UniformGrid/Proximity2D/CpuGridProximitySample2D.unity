@@ -532,6 +532,7 @@ GameObject:
   m_Component:
   - component: {fileID: 918468517}
   - component: {fileID: 918468518}
+  - component: {fileID: 918468519}
   m_Layer: 7
   m_Name: UniformGrid
   m_TagString: Untagged
@@ -573,7 +574,7 @@ MonoBehaviour:
   links:
     cellDensity: {fileID: 2100000, guid: d6ce1f6a171ceb24e9925f4813bb28ec, type: 2}
   tuner:
-    srcMode: 0
+    srcMode: 2
     setGlobalParams: 1
     visualize: -1
     gridTuner:
@@ -586,6 +587,44 @@ MonoBehaviour:
       planeZ: 0
       bitsPerAxis: 5
       elementCapacity: 1024
+  gridProvider: {fileID: 0}
+--- !u!114 &918468519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 918468515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d75ef543ffe99354295ad22b313fde4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: GPUUniformGrid::Nobnak.GPU.UniformGrid.GPUUniformGridBehaviour2D
+  events:
+    OnGridChanged:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 918468518}
+          m_TargetAssemblyTypeName: UniformGridView2D, GPUUniformGrid
+          m_MethodName: SetRuntimeProvider
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  gridCenter:
+    x: 0
+    y: 0
+  gridSize:
+    x: 20
+    y: 20
+  planeZ: 0
+  bitsPerAxis: 5
+  elementCapacity: 1024
 --- !u!1 &1908942363
 GameObject:
   m_ObjectHideFlags: 0
