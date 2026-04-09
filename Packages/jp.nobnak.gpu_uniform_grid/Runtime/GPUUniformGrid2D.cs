@@ -23,8 +23,19 @@ namespace Nobnak.GPU.UniformGrid {
                 throw new InvalidOperationException(
                     $"Compute shader '{CS_UNIFORM_GRID_2D}' not found. Expected Resources/Shader/UniformGrid2D.compute.");
             kernelInitializeGrid = compute.FindKernel(K_InitializeGrid);
-            cellHead = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.TotalNumberOfCells, 4);
-            cellNext = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.elementCapacity, 4);
+            GraphicsBuffer h = null, n = null;
+            try {
+                h = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.TotalNumberOfCells, 4);
+                n = new GraphicsBuffer(GraphicsBuffer.Target.Raw, (int)gridParams.elementCapacity, 4);
+            } catch {
+                if (h != null)
+                    h.Dispose();
+                if (n != null)
+                    n.Dispose();
+                throw;
+            }
+            cellHead = h;
+            cellNext = n;
             Reset();
         }
 
