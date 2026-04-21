@@ -7,11 +7,17 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
-public class ParticleDataUploader : MonoBehaviour {
+public class ParticleDataUploader : MonoBehaviour, IGPUUniformGridProvider {
 
     [SerializeField] protected Tuner tuner = new();
 
-    public GPUUniformGrid grid { get; set; }
+    protected IGPUUniformGridProvider gridProvider;
+
+    public GPUUniformGrid Grid => gridProvider?.Grid;
+
+    public void SetGridProvider(IGPUUniformGridProvider provider) {
+        gridProvider = provider;
+    }
 
     protected ParticleSystem ps;
     protected ComputeShader cs;
@@ -38,7 +44,9 @@ public class ParticleDataUploader : MonoBehaviour {
     }
 
     void Update() {
-        if (ps == null || grid == null || cs == null) return;
+        if (ps == null || cs == null || gridProvider == null) return;
+        var grid = gridProvider.Grid;
+        if (grid == null) return;
 
         var gridParams = grid.gridParams;
         var gridElementCap = (int)gridParams.elementCapacity;

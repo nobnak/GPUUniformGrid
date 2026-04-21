@@ -587,7 +587,7 @@ MonoBehaviour:
       planeZ: 0
       bitsPerAxis: 5
       elementCapacity: 1024
-  gridProvider: {fileID: 0}
+  gridProvider: {fileID: 918468519}
 --- !u!114 &918468519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -615,7 +615,7 @@ MonoBehaviour:
             m_FloatArgument: 0
             m_StringArgument: 
             m_BoolArgument: 0
-          m_CallState: 2
+          m_CallState: 0
   gridCenter:
     x: 0
     y: 0

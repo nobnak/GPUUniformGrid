@@ -461,7 +461,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 1603670577}
           m_TargetAssemblyTypeName: ParticleDataUploader, GPUUniformGrid
-          m_MethodName: set_grid
+          m_MethodName: SetGridProvider
           m_Mode: 0
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
