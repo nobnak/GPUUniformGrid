@@ -464,11 +464,23 @@ MonoBehaviour:
   events:
     OnGridChanged:
       m_PersistentCalls:
-        m_Calls: []
+        m_Calls:
+        - m_Target: {fileID: 1603670577}
+          m_TargetAssemblyTypeName: ParticleDataUploader, Assembly-CSharp
+          m_MethodName: SetGridProvider
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 1
   links:
     cellDensity: {fileID: 2100000, guid: ed1ce20de4de8644dbfc92ff7f87d69d, type: 2}
   tuner:
-    srcMode: 2
+    srcMode: 0
     setGlobalParams: 1
     visualize: -1
     gridTuner:
