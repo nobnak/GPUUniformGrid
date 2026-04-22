@@ -8,6 +8,7 @@ UPM package **`jp.nobnak.gpu_uniform_grid`**: a **GPU uniform spatial grid** bui
 |------|---------------------|
 | 3D grid | [`UniformGridParams`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Data/UniformGridParams.cs), [`GPUUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/GPUUniformGrid.cs), [`CPUUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/CPUUniformGrid.cs), [`UniformGrid.compute`](Packages/jp.nobnak.gpu_uniform_grid/Resources/Shader/UniformGrid.compute) |
 | 2D grid | [`UniformGridParams2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Data/UniformGridParams2D.cs), [`GPUUniformGrid2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/GPUUniformGrid2D.cs), [`CPUUniformGrid2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/CPUUniformGrid2D.cs), [`UniformGrid2D.compute`](Packages/jp.nobnak.gpu_uniform_grid/Resources/Shader/UniformGrid2D.compute) |
+| Compact 3D / 2D | [`CompactUniformGridParams3D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Data/CompactUniformGridParams3D.cs) / [`CompactUniformGridParams2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Data/CompactUniformGridParams2D.cs), [`GPUCompactUniformGrid`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Compact/GPUCompactUniformGrid.cs) / [`GPUCompactUniformGrid2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Compact/GPUCompactUniformGrid2D.cs), compute under [`Resources/Shader/Compact/`](Packages/jp.nobnak.gpu_uniform_grid/Resources/Shader/Compact/) — [`Docs/unity_fixed_grid.md`](Docs/unity_fixed_grid.md) |
 | HLSL helpers | [`UniformGrid-hl.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl), [`UniformGrid2D-hl.hlsl`](Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid2D-hl.hlsl) — e.g. `InsertElementIdAtPosition`, `GetParticleDensityAtPosition` (define **`GET_PARTICLE_POSITION`**) |
 | CPU readback | [`UniformGridConverter.ToCPU`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/Converter/UniformGridConverter.cs) → `CPUUniformGrid` / `CPUUniformGrid2D` |
 | Debug draw | [`UniformGridView`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/View/UniformGridView.cs), [`UniformGridView2D`](Packages/jp.nobnak.gpu_uniform_grid/Runtime/View/UniformGridView2D.cs) + package shaders |
@@ -33,6 +34,8 @@ Or add the OpenUPM scoped registry (`https://package.openupm.com`, scope `jp.nob
 **3D:** `new GPUUniformGrid(params)` → each frame `Reset()` → `SetParams(compute, kernel)` (or globals) on your insert pass → in HLSL use helpers from `UniformGrid-hl.hlsl` / low-level APIs in `UniformGrid.hlsl`. **`Dispose()`** when done.
 
 **2D:** Same flow with `GPUUniformGrid2D` / `UniformGrid2D-hl.hlsl` / `UniformGrid2D.hlsl`.
+
+**Compact (per-cell cap `M`):** `GPUCompactUniformGrid2D` / `GPUCompactUniformGrid` → each frame `Reset()` then `DispatchBuild(positions, count)`; optional `CompactUniformGridOverflowDebug`. See package README.
 
 ---
 

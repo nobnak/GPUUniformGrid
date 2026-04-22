@@ -1,0 +1,27 @@
+#pragma kernel CS_Init
+#pragma kernel CS_Build
+
+#include "../../../ShaderLibrary/Compact/CompactUniformGrid2D.hlsl"
+
+StructuredBuffer<float2> Positions2D;
+RWStructuredBuffer<uint> CellCounts;
+RWStructuredBuffer<uint> CellParticles;
+
+[numthreads(256, 1, 1)]
+void CS_Init(uint id : SV_DispatchThreadID) {
+    if (id < _TotalCells)
+        CellCounts[id] = 0;
+}
+
+[numthreads(256, 1, 1)]
+void CS_Build(uint id : SV_DispatchThreadID) {
+    if (id >= _NumParticles)
+        return;
+    uint cell;
+    if (!CompactUniformGrid2D_CellID(Positions2D[id], cell))
+        return;
+    uint idx;
+    InterlockedAdd(CellCounts[cell], 1u, idx);
+    if (idx < _M)
+        CellParticles[cell * _M + idx] = id;
+}
