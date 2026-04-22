@@ -2,7 +2,7 @@
 #define __CPU_PROXIMITY_QUERY_2D_HLSL__
 
 #include "Assets/Samples/LinkedList2D/Include/CpuProximityData2D.hlsl"
-#include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid2D.hlsl"
+#include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/LinkedList/UniformGrid2D.hlsl"
 
 void GetNearestPointSqDistanceAtPosition2D(float2 planePos, float searchRadiusWorld, out float minSqDist) {
     minSqDist = 1e38;

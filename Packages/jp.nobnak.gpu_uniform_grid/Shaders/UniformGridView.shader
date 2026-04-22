@@ -19,7 +19,7 @@ Shader "Unlit/UniformGridView" {
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "../ShaderLibrary/UniformGrid.hlsl"
+            #include "../ShaderLibrary/LinkedList/UniformGrid.hlsl"
 
             static const float3 box_vertices[] = {
                 float3(0, 0, 0), 

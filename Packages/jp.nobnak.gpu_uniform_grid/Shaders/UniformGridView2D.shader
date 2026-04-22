@@ -18,7 +18,7 @@ Shader "Unlit/UniformGridView2D" {
             #pragma fragment frag
 
             #include "UnityCG.cginc"
-            #include "../ShaderLibrary/UniformGrid2D.hlsl"
+            #include "../ShaderLibrary/LinkedList/UniformGrid2D.hlsl"
 
             static const float2 rect_v[] = {
                 float2(0, 0), float2(1, 0), float2(1, 1), float2(0, 1)

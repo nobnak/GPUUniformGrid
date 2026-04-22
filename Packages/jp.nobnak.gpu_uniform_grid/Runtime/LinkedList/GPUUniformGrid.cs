@@ -23,7 +23,7 @@ namespace Nobnak.GPU.UniformGrid {
             this.compute = Resources.Load<ComputeShader>(CS_UNIFORM_GRID);
             if (compute == null)
                 throw new System.InvalidOperationException(
-                    $"Compute shader '{CS_UNIFORM_GRID}' not found. Expected under Resources/Shader/UniformGrid.compute.");
+                    $"Compute shader '{CS_UNIFORM_GRID}' not found. Expected under Resources/Shader/LinkedList/UniformGrid.compute.");
             this.kernelInitializeGrid = compute.FindKernel(K_InitializeGrid);
 
             GraphicsBuffer h = null, n = null;
@@ -147,7 +147,7 @@ namespace Nobnak.GPU.UniformGrid {
 
         #region declarations
         public const string K_InitializeGrid = "InitializeGrid";
-        private const string CS_UNIFORM_GRID = "Shader/UniformGrid";
+        private const string CS_UNIFORM_GRID = "Shader/LinkedList/UniformGrid";
 
         public static readonly uint3 ThreadGroupSize = new uint3(64, 1, 1);
 

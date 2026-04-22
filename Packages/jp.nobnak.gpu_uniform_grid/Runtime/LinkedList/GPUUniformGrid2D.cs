@@ -21,7 +21,7 @@ namespace Nobnak.GPU.UniformGrid {
             compute = Resources.Load<ComputeShader>(CS_UNIFORM_GRID_2D);
             if (compute == null)
                 throw new InvalidOperationException(
-                    $"Compute shader '{CS_UNIFORM_GRID_2D}' not found. Expected Resources/Shader/UniformGrid2D.compute.");
+                    $"Compute shader '{CS_UNIFORM_GRID_2D}' not found. Expected Resources/Shader/LinkedList/UniformGrid2D.compute.");
             kernelInitializeGrid = compute.FindKernel(K_InitializeGrid);
             GraphicsBuffer h = null, n = null;
             try {
@@ -130,7 +130,7 @@ namespace Nobnak.GPU.UniformGrid {
         #region declarations
 
         public const string K_InitializeGrid = "InitializeGrid";
-        const string CS_UNIFORM_GRID_2D = "Shader/UniformGrid2D";
+        const string CS_UNIFORM_GRID_2D = "Shader/LinkedList/UniformGrid2D";
 
         public static readonly int P_cellHead_Len = Shader.PropertyToID("UniformGrid2D_cellHead_Len");
         public static readonly int P_cellNext_Len = Shader.PropertyToID("UniformGrid2D_cellNext_Len");

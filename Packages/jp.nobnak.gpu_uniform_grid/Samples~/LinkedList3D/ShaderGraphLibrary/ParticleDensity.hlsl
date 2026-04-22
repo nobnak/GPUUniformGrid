@@ -5,7 +5,7 @@
 
 #include "Assets/Samples/LinkedList3D/ShaderLibrary/ParticleData.hlsl"
 #define GET_PARTICLE_POSITION(i) GetParticlePosition(i)
-#include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/UniformGrid-hl.hlsl"
+#include "Packages/jp.nobnak.gpu_uniform_grid/ShaderLibrary/LinkedList/UniformGrid-hl.hlsl"
 
 void GetParticleDensity_float(float3 Position, float Distance, int Limit, out float4 Count) {
     GetParticleDensityAtPosition(Position, Distance, Limit, Count);

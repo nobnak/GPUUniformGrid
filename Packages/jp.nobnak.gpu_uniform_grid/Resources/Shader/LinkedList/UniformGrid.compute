@@ -1,6 +1,6 @@
 #pragma kernel InitializeGrid
 
-#include "../../ShaderLibrary/UniformGrid.hlsl"
+#include "../../../ShaderLibrary/LinkedList/UniformGrid.hlsl"
 
 [numthreads(64,1,1)]
 void InitializeGrid (uint3 id : SV_DispatchThreadID) {
