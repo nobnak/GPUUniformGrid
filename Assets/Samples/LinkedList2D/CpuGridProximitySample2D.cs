@@ -3,16 +3,18 @@ using Nobnak.GPU.UniformGrid;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 2D グリッド版: <see cref="CPUUniformGrid2D"/> でランダム点を格納し <see cref="GPUUniformGrid2D.UploadFrom"/> で GPU に載せる。
-/// 同一シーンの <see cref="UniformGridView2D"/> が <c>SetParamsGlobal</c> する想定（実行順は本コンポーネントを後に）。
+/// 同一シーンの <see cref="IGPUUniformGridProvider2D"/>（例: <see cref="UniformGridView2D"/> や <see cref="GPUUniformGridBehaviour2D"/>）が <c>SetParamsGlobal</c> する想定（実行順は本コンポーネントを後に）。
 /// シェーダ <c>Unlit/CpuGridProximity2D</c> はクエリ位置に <c>worldPosition.xy</c> を使う（論理平面 = ワールド XY の例）。
 /// </summary>
 [DefaultExecutionOrder(20)]
 public class CpuGridProximitySample2D : MonoBehaviour {
 
-    [SerializeField] UniformGridView2D uniformGridView2D;
+    [FormerlySerializedAs("uniformGridView2D")]
+    [SerializeField] MonoBehaviour gpuUniformGridProvider;
     [SerializeField] int pointCount = 256;
     [SerializeField] bool regenerateEveryFrame = true;
     [SerializeField] uint randomSeed = 0xC0FFEEu;
@@ -32,7 +34,8 @@ public class CpuGridProximitySample2D : MonoBehaviour {
     }
 
     void Update() {
-        var gpu = uniformGridView2D != null ? uniformGridView2D.ActiveGrid : null;
+        var provider = gpuUniformGridProvider as IGPUUniformGridProvider2D;
+        var gpu = provider?.Grid;
         if (gpu == null)
             return;
 

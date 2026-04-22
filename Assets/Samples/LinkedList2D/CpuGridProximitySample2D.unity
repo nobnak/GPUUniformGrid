@@ -538,7 +538,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &918468517
 Transform:
   m_ObjectHideFlags: 0
@@ -577,7 +577,7 @@ MonoBehaviour:
     x: 20
     y: 20
   planeZ: 0
-  bitsPerAxis: 4
+  bitsPerAxis: 6
   elementCapacity: 10000
 --- !u!1 &1697929493
 GameObject:
@@ -615,7 +615,7 @@ MonoBehaviour:
   links:
     cellDensity: {fileID: 2100000, guid: d6ce1f6a171ceb24e9925f4813bb28ec, type: 2}
   tuner:
-    srcMode: 0
+    srcMode: 2
     setGlobalParams: 1
     visualize: -1
     gridTuner:
@@ -688,7 +688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57a8192a3b4c5d6e7f8091a2b3c4d5e6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::CpuGridProximitySample2D
-  uniformGridView2D: {fileID: 1697929494}
+  gpuUniformGridProvider: {fileID: 918468519}
   pointCount: 10000
   regenerateEveryFrame: 0
   randomSeed: 12648430
