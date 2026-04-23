@@ -18,7 +18,17 @@ float4 UniformGrid2D_cellSize;
 uint UniformGrid2D_cellCount;
 
 bool UniformGrid2D_IsValid() {
-	return UniformGrid2D_cellHead_Len > 0 && UniformGrid2D_cellNext_Len > 0;
+	// 長さのみ true になり得る未設定・残留パラメータではセル走査が爆発しうる
+	if (UniformGrid2D_cellHead_Len == 0u || UniformGrid2D_cellNext_Len == 0u)
+		return false;
+	uint n = UniformGrid2D_cellCount;
+	if (n == 0u)
+		return false;
+	if (UniformGrid2D_cellSize.x <= 0.0 || UniformGrid2D_cellSize.y <= 0.0)
+		return false;
+	if ((UniformGrid2D_cellHead_Len / n) < n)
+		return false;
+	return true;
 }
 
 bool UniformGrid2D_IsCellPositionValid(float2 cellPosition) {

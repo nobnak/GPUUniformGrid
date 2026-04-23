@@ -6,6 +6,8 @@
 
 void GetNearestPointSqDistanceAtPosition2D(float2 planePos, float searchRadiusWorld, out float minSqDist) {
     minSqDist = 1e38;
+    if (_CpuPointPositions2D_Length == 0u)
+        return;
     if (!UniformGrid2D_IsValid())
         return;
 
