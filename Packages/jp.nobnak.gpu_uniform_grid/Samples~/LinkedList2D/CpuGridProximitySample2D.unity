@@ -577,7 +577,7 @@ MonoBehaviour:
     x: 20
     y: 20
   planeZ: 0
-  bitsPerAxis: 5
+  bitsPerAxis: 6
   elementCapacity: 10000
 --- !u!1 &1697929493
 GameObject:

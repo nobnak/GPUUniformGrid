@@ -26,9 +26,6 @@ public class CpuGridProximitySample2D : MonoBehaviour {
     GPUUniformGrid2D boundGpu;
     bool staticLayoutUploaded;
 
-    public static readonly int P_CpuPointPositions2D_Length = Shader.PropertyToID("_CpuPointPositions2D_Length");
-    public static readonly int P_CpuPointPositions2D = Shader.PropertyToID("_CpuPointPositions2D");
-
     void OnDisable() {
         DisposeBuffers();
     }
@@ -61,8 +58,8 @@ public class CpuGridProximitySample2D : MonoBehaviour {
         }
 
         if (setGlobalPointBuffers) {
-            Shader.SetGlobalInteger(P_CpuPointPositions2D_Length, n);
-            Shader.SetGlobalBuffer(P_CpuPointPositions2D, positionsBuffer);
+            Shader.SetGlobalInteger(CpuProximityShaderGlobals2D.LengthId, n);
+            Shader.SetGlobalBuffer(CpuProximityShaderGlobals2D.BufferId, positionsBuffer);
         }
     }
 
@@ -102,5 +99,7 @@ public class CpuGridProximitySample2D : MonoBehaviour {
         }
         boundGpu = null;
         staticLayoutUploaded = false;
+        if (setGlobalPointBuffers)
+            CpuProximityShaderGlobals2D.Clear();
     }
 }

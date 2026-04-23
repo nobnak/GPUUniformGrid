@@ -82,6 +82,19 @@ namespace Nobnak.GPU.UniformGrid {
             Shader.SetGlobalInteger(P_UniformGrid_cellCount, (int)gridParams.NumberOfCellsPerAxis);
         }
 
+        /// <summary>Edit モード等で <see cref="SetParamsGlobal"/> が呼ばれないときの残留バインドを外す。</summary>
+        public static void ClearParamsGlobal() {
+            Shader.SetGlobalInteger(P_UniformGrid_cellHead_Len, 0);
+            Shader.SetGlobalInteger(P_UniformGrid_cellNext_Len, 0);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellHead_rw, (GraphicsBuffer)null);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellNext_rw, (GraphicsBuffer)null);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellHead_r, (GraphicsBuffer)null);
+            Shader.SetGlobalBuffer(P_UniformGrid_cellNext_r, (GraphicsBuffer)null);
+            Shader.SetGlobalVector(P_UniformGrid_cellOffset, Vector4.zero);
+            Shader.SetGlobalVector(P_UniformGrid_cellSize, Vector4.zero);
+            Shader.SetGlobalInteger(P_UniformGrid_cellCount, 0);
+        }
+
         /// <summary>
         /// <see cref="CPUUniformGrid"/> で構築した連結リストをそのまま GPU バッファへ転送する。
         /// </summary>
